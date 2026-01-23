@@ -191,7 +191,7 @@ const files = [
 ];
 
 files.forEach(file => {
-  loader.load(`models/${file}`, gltf => {
+  loader.load(`${file}`, gltf => {
     const obj = gltf.scene;
     if (file.startsWith("GT_")) {
   obj.visible = file === "GT_Cockpit_Base.glb";
