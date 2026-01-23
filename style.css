@@ -1,0 +1,520 @@
+/* ---------- BASE ---------- */
+
+/* ---------- TOP BAR ---------- */
+:root {
+  --topbar-height: 48px;
+}
+
+#topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 48px;
+  background: #000;
+  z-index: 20;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+
+  padding-right: 200px;
+}
+/* ---------- SPEC SWITCH ---------- */
+
+#specSwitch {
+  margin-right: auto; /* pushes logo + socials to the right */
+  display: flex;
+  gap: 10px;
+  padding-left: 20px;
+}
+
+.spec-btn {
+  height: 32px;
+  min-width: 96px;           /* equal size buttons */
+  padding: 0 18px;
+
+  background: #fff;
+  color: #000;
+
+  border: 2px solid transparent;
+  border-radius: 999px;      /* full pill */
+
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+/* ===== GT / KART SPEC TOGGLE BUTTONS ===== */
+
+.spec-btn {
+  background: #fff;
+  color: #000;
+  border: 2px solid #ccc;
+
+  border-radius: 999px; /* pill */
+  padding: 6px 16px;
+
+  font-weight: 700;
+  cursor: pointer;
+
+  transition: 
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.spec-btn.active {
+  background: #1677ff;   /* JUICY BLUE */
+  color: #fff;           /* WHITE TEXT */
+  border-color: #fff;    /* WHITE OUTLINE */
+}
+
+#logo {
+  order: 1;
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+
+
+/* ---------- TOP BAR SOCIALS ---------- */
+
+#socials {
+  order: 2;
+  display: flex;
+  gap: 14px;
+  margin-right: 14px;
+}
+
+#socials a {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#socials svg {
+  width: 100%;
+  height: 100%;
+  fill: none;          /* ← IMPORTANT */
+  stroke: #fff;        /* ← THIS is the color */
+  stroke-width: 1.8;   /* ← crisp, premium */
+  opacity: 0.85;
+  shape-rendering: geometricPrecision;
+  text-rendering: geometricPrecision;
+}
+
+#socials a:hover svg {
+  opacity: 0.6;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #f2f2f2;
+}
+
+/* ---------- UI PANEL ---------- */
+
+#ui {
+  position: fixed;
+  left: 20px;
+
+  /* TRUE vertical centering between top bar bottom and window bottom */
+  top: calc(
+    var(--topbar-height) +
+    (100vh - var(--topbar-height)) / 2
+  );
+  transform: translateY(-50%);
+
+  width: 260px;
+  max-height: calc(100vh - var(--topbar-height) - 60px);
+
+  padding: 10px;
+  background: #e5e5e5;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+#ui::after {
+  content: "";
+  position: sticky;
+  bottom: 0;
+
+  height: px;
+  pointer-events: none;
+
+  background: linear-gradient(
+    to bottom,
+    rgba(229, 229, 229, 0),
+    rgba(229, 229, 229, 1)
+  );
+}
+
+/* ---------- HEADINGS ---------- */
+
+h3 {
+  margin: 6px 0 2px;
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+/* ---------- BUTTONS ---------- */
+
+button {
+ padding: 8px 12px;
+  background: #fff;
+  border: 2px solid transparent;
+  cursor: pointer;
+  text-align: center;
+}
+button.active {
+  border-color: #f10c45;
+}
+.price {
+  font-size: 0.8em;
+  opacity: 0.6;
+  margin-left: 6px;
+}
+/* ---------- ACCESSORY BUTTONS (MATCH SCREEN & WHEELS) ---------- */
+
+.gt-only button,
+.kart-only button {
+  display: block;
+  width: 100%;
+
+  padding: 8px 12px;
+  margin-bottom: 6px;
+
+  background: #fff;
+  border: 2px solid transparent;
+
+  text-align: center;
+}
+
+/* Active state identical to others */
+.gt-only button.active,
+.kart-only button.active {
+  border-color: #f10c45;
+}
+
+/* Price behaves EXACTLY like screen & wheels */
+.gt-only button .price,
+.kart-only button .price {
+  font-size: 0.8em;
+  opacity: 0.6;
+  margin-left: 6px;
+}
+/* ---------- GROUPS ---------- */
+
+.group {
+  display: flex;
+  gap: 8px;
+}
+
+.color {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* ---------- COLOR SWATCH ---------- */
+
+.swatch {
+  width: 14px;
+  height: 14px;
+}
+
+.swatch.silver {
+  background: #cfcfcf;
+}
+
+.swatch.black {
+  background: #000;
+}
+
+.color.silver,
+.color.black {
+  color: #000;
+}
+
+/* ---------- SEPARATOR ---------- */
+
+hr {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 8px 0;
+}
+
+/* ---------- TOTAL ---------- */
+
+#totalPrice {
+  position: fixed;
+  bottom: 70px;
+  right: 20px;
+
+  width: 220px;
+  padding: 10px 18px;
+
+  background: #f10c45;
+  color: #fff;
+
+  font-weight: 800;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+#finalizeBtn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+
+  width: 220px;
+
+  padding: 10px 18px;   /* 👈 reduced to offset bigger text */
+  font-size: 1.05rem;   /* 👈 bigger text only */
+
+  background: #1677ff;
+  color: #fff;
+
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+}
+
+/* ---------- OVERLAY ---------- */
+
+#overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
+#overlay.show {
+  display: flex;
+}
+
+.overlay-card {
+  background: #fff;
+  padding: 24px 28px;
+  width: 360px;
+  position: relative;
+}
+
+.overlay-card h2 {
+  margin-top: 0;
+}
+
+.close-overlay {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.overlay-price {
+  margin-top: 16px;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.overlay-note {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+/* ========================================================= */
+/* =================== TOOLTIP SYSTEM ====================== */
+/* ========================================================= */
+
+/* ===== SPEC TOOLTIP HIERARCHY ===== */
+#tooltip.spec-tooltip {
+  max-width: 320px;       /* slightly wider */
+  padding: 14px 16px;     /* more breathing room */
+  font-size: 0.9rem;      /* tiny bump, not shouting */
+}
+
+/* Bold first sentence only */
+#tooltip.spec-tooltip strong {
+  font-weight: 700;
+}
+
+[data-tooltip] {
+  position: relative;
+}
+
+/* GLOBAL TOOLTIP */
+
+
+#tooltip {
+  position: fixed;
+  min-width: 220px;
+  max-width: 260px;
+
+  padding: 10px 14px;
+  background: rgba(31, 31, 31, 0.95);
+  color: #fff;
+
+  font-size: 0.85rem;
+  line-height: 1.4;
+
+  border-radius: 12px;
+  border: 2px solid rgb(254, 167, 0);
+
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+
+  z-index: 9999;
+}
+
+/* Visible state */
+#tooltip.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Optional dark mode */
+body.black-mode #tooltip {
+  background: rgba(42, 42, 42, 0.95);
+}
+
+/* Hover activates tooltip */
+[data-tooltip]:hover::after {
+  opacity: 1;
+}
+
+/* Dark cockpit mode safety */
+body.black-mode [data-tooltip]::after {
+  background: rgba(42, 42, 42, 0.95);
+}
+
+html,
+body {
+  background: #1f1f1f; /* default = silver cockpit */
+}
+
+/* ================= ROTATE PHONE OVERLAY ================= */
+
+#rotateOverlay {
+  position: fixed;
+  inset: 0;
+
+  background: #000;
+  color: #fff;
+
+  display: none;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 999999;
+}
+.rotateLogo {
+  font-size: 9rem;
+  font-weight: 900;
+  letter-spacing: 3px;
+  margin-bottom: 100px;
+}
+#rotateOverlay.show {
+  display: flex;
+}
+
+.rotateContent {
+  text-align: center;
+  font-weight: 600;
+}
+
+.rotateIcon {
+  font-size: 148px;
+  margin-bottom: 16px;
+}
+
+.rotateText {
+  font-size: 5rem;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+#orbitHint {
+  position: fixed;
+  top: 88px; /* tucked under top bar, intentional */
+  right: 26px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  color: var(--accent-yellow, rgb(254, 167, 0));
+  font-size: 14px;              /* 👈 bigger */
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 6;
+}
+
+#orbitHint .arrow {
+  font-size: 18px;              /* 👈 clearer gesture */
+  line-height: 1;
+  animation: orbitPulse 2s ease-in-out infinite;
+}
+
+@keyframes orbitPulse {
+  0%   { transform: rotate(0deg);   opacity: 0.4; }
+  50%  { transform: rotate(180deg); opacity: 1; }
+  100% { transform: rotate(360deg); opacity: 0.4; }
+}
+body.loading > *:not(#rotateOverlay) {
+  visibility: hidden;
+}
+@media (pointer: coarse) {
+ #ui {
+    top: calc(var(--topbar-height) + 12px);
+    transform: none;
+    max-height: calc(100dvh - var(--topbar-height) - 53px);
+  }
+}
+
+.gt-only { display: block; }
+.kart-only { display: none; }
+
+/* Spec-based UI visibility */
+.gt-only {
+  display: block;
+}
+
+.kart-only {
+  display: none;
+}
+
+/* When Kart spec is active */
+body.kart-spec .gt-only {
+  display: none;
+}
+
+body.kart-spec .kart-only {
+  display: block;
+}

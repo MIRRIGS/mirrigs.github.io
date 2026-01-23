@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MIR GT-Spec Configurator</title>
+<!-- ===== SITE ICONS / SHARE PREVIEW ===== -->
+
+<!-- Browser tab favicon -->
+<link rel="icon" type="image/png" href="https://mirrigs.netlify.app/assets/MIRLOGO.png">
+
+<!-- iPhone / iPad home screen icon -->
+<link rel="apple-touch-icon" href="https://mirrigs.netlify.app/assets/MIRLOGO.png">
+
+<!-- WhatsApp / Instagram / iMessage / Facebook / Google preview -->
+<meta property="og:image" content="https://mirrigs.netlify.app/assets/MIRLOGO.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MIR RIGS – Sim Racing Cockpits">
+<meta property="og:description" content="Configure your GT-Spec or Kart-Spec sim racing cockpit. Built in India. No compromises.">
+
+<!-- Twitter / X preview -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://mirrigs.netlify.app/assets/MIRLOGO.png">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="loading"></body>
+
+<div id="topbar">
+
+  <!-- SPEC SWITCH -->
+  <div id="specSwitch">
+  <button
+    class="spec-btn active"
+    onclick="switchSpec('gt', this)"
+    data-tooltip
+    data-tooltip-type="spec"
+    data-tooltip-text="A full-size, no-compromise sim racing cockpit. Built for realism, comfort, and high-end setups with ample space. Supports most seats, including car seats, gaming seats, and fiberglass bucket seats."
+  >
+    GT-Spec
+  </button>
+
+  <button
+    class="spec-btn"
+    onclick="switchSpec('kart', this)"
+    data-tooltip
+    data-tooltip-type="spec"
+    data-tooltip-text="A compact karting-style cockpit made for small spaces, easy storage, and affordable setups. It can be folded or stored in an area as small as 20 by 20 inches."
+  >
+    Kart-Spec
+  </button>
+</div>
+
+  <div id="logo">MIR RIGS</div>
+
+  <div id="socials">
+    <a href="https://wa.me/919999071077" target="_blank" aria-label="WhatsApp">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.9c0 1.98.52 3.91 1.5 5.61L2 22l4.66-1.61a9.86 9.86 0 0 0 5.38 1.58h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2Zm5.75 13.55c-.24.68-1.4 1.29-1.92 1.35-.48.06-1.08.09-1.74-.11-.4-.13-.91-.3-1.57-.58-2.76-1.2-4.56-4.13-4.7-4.32-.14-.19-1.12-1.49-1.12-2.84s.71-2.02.96-2.29c.24-.26.54-.33.72-.33h.52c.17 0 .4-.06.62.47.23.56.78 1.94.85 2.08.07.14.11.31.02.5-.09.19-.14.31-.28.48-.14.17-.3.33-.43.45-.14.14-.29.3-.13.59.16.29.72 1.19 1.54 1.93 1.06.94 1.95 1.24 2.24 1.38.29.14.46.12.63-.07.17-.19.72-.84.91-1.13.19-.28.38-.23.63-.14.25.09 1.6.76 1.88.9.28.14.47.21.54.33.07.12.07.69-.17 1.37Z"/>
+</svg>
+    </a>
+
+    <a href="https://www.instagram.com/mir_rigs" target="_blank" aria-label="Instagram">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M12 2.2c3.2 0 3.58.01 4.85.07 1.17.06 1.97.24 2.43.41a4.9 4.9 0 0 1 1.77 1.03 4.9 4.9 0 0 1 1.03 1.77c.17.46.35 1.26.41 2.43.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.06 1.17-.24 1.97-.41 2.43a4.9 4.9 0 0 1-1.03 1.77 4.9 4.9 0 0 1-1.77 1.03c-.46.17-1.26.35-2.43.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.06-1.97-.24-2.43-.41a4.9 4.9 0 0 1-1.77-1.03 4.9 4.9 0 0 1-1.03-1.77c-.17-.46-.35-1.26-.41-2.43C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.06-1.17.24-1.97.41-2.43a4.9 4.9 0 0 1 1.03-1.77 4.9 4.9 0 0 1 1.77-1.03c.46-.17 1.26-.35 2.43-.41C8.42 2.21 8.8 2.2 12 2.2Zm0 3.08a6.72 6.72 0 1 0 0 13.44 6.72 6.72 0 0 0 0-13.44Zm0 11.08a4.36 4.36 0 1 1 0-8.72 4.36 4.36 0 0 1 0 8.72Zm5.4-11.55a1.02 1.02 0 1 1 0 2.04 1.02 1.02 0 0 1 0-2.04Z"/>
+</svg>
+    </a>
+  </div>
+</div>
+
+<div id="ui">
+
+  <h3>Cockpit Color</h3>
+  <div class="group">
+    <button
+      class="color silver active"
+      onclick="setCockpitColor('silver', this); updateDisplayedPrices('silver')"
+    >
+      <span class="swatch silver"></span> Silver
+    </button>
+
+    <button
+      class="color black"
+      onclick="setCockpitColor('black', this); updateDisplayedPrices('black')"
+      data-tooltip="Black powder-coated cockpits cost an extra ₹2,000. Custom colors are also available."
+    >
+      <span class="swatch black"></span> Black
+    </button>
+  </div>
+
+  <hr>
+
+  <h3>Screen Mount</h3>
+
+  <button
+    onclick="selectScreen('GT_Monitor_Single_Integrated.glb', this)"
+    data-tooltip="Compatible with standard VESA TV and monitor mounts. Integrated mounts cannot be used with the PS5 holder."
+  >
+    Single Integrated
+    <span
+      class="price"
+      data-price-display
+      data-base-price="6500"
+      data-black-extra="600"
+    >(₹6,500)</span>
+  </button>
+
+  <button
+    onclick="selectScreen('GT_Monitor_Single_Standalone.glb', this)"
+    data-tooltip="Compatible with standard VESA TV and monitor mounts."
+  >
+    Single Standalone
+    <span
+      class="price"
+      data-price-display
+      data-base-price="8000"
+      data-black-extra="600"
+    >(₹8,000)</span>
+  </button>
+
+  <button
+    onclick="selectScreen('GT_Monitor_Triple_Integrated.glb', this)"
+    data-tooltip="Compatible with standard VESA TV and monitor mounts. Integrated mounts cannot be used with the PS5 holder."
+  >
+    Triple Integrated
+    <span
+      class="price"
+      data-price-display
+      data-base-price="10000"
+      data-black-extra="1000"
+    >(₹10,000)</span>
+  </button>
+
+  <button
+    onclick="selectScreen('GT_Monitor_Triple_Standalone.glb', this)"
+    data-tooltip="Compatible with standard VESA TV and monitor mounts."
+  >
+    Triple Standalone
+    <span
+      class="price"
+      data-price-display
+      data-base-price="13000"
+      data-black-extra="1000"
+    >(₹13,000)</span>
+  </button>
+
+  <hr>
+
+<h3>Accessories</h3>
+
+<div class="gt-only">
+
+  <button
+    onclick="selectShifter('GT_Shifter_Big.glb', this)"
+    data-tooltip="Designed for heavy-duty shifters and handbrakes. Also reinforces the wheel mount for improved rigidity."
+  >
+    Pro Shifter Mount
+    <span
+      class="price"
+      data-price-display
+      data-base-price="6500"
+      data-black-extra="800"
+    >(₹6,500)</span>
+  </button>
+
+  <button onclick="selectShifter('GT_Shifter_Small.glb', this)">
+    Basic Shifter Mount <span class="price">(₹3,000)</span>
+  </button>
+
+  <button onclick="toggleAddon('GT_Cupholder.glb', this)">
+    Cupholder <span class="price">(₹1,000)</span>
+  </button>
+
+  <button onclick="toggleAddon('GT_Headphone_Mount.glb', this)">
+    Headset Mount <span class="price">(₹1,000)</span>
+  </button>
+
+ <button
+  onclick="togglePS5(this)"
+  data-tooltip="Cannot be used when an integrated screen mount is selected."
+>
+  PS5 Holder <span class="price">(₹1,500)</span>
+</button>
+
+  <button
+    onclick="toggleAddon('GT_Upgraded_Brackets.glb', this)"
+    data-tooltip="Adds visual refinement and extra structural strength. Increases clearance for easier entry and exit, and recommended for high-torque wheel bases."
+  >
+    Upgraded Brackets <span class="price">(₹2,400)</span>
+  </button>
+
+</div>
+
+<div class="kart-only">
+
+  <button
+    onclick="toggleAddon('KART_Verticle.glb', this)"
+    data-tooltip="Used for users who need to fold or store their cockpit when not in use."
+  >
+    Vertical Supports <span class="price">(₹0)</span>
+  </button>
+
+  <button
+    onclick="toggleAddon('KART_Legs.glb', this)"
+    data-tooltip="Raises the cockpit off the floor. Cannot be used with vertical supports."
+  >
+    Legs <span class="price">(₹1,500)</span>
+  </button>
+
+  <button onclick="selectShifter('GT_Shifter_Small.glb', this)">
+    Shifter Mount <span class="price">(₹3,000)</span>
+  </button>
+
+  <button onclick="toggleAddon('KART_Cupholder.glb', this)">
+    Cupholder <span class="price">(₹1,000)</span>
+  </button>
+
+  <button onclick="toggleAddon('KART_Headphone_Mount.glb', this)">
+    Headset Mount <span class="price">(₹1,000)</span>
+  </button>
+
+ <button
+  onclick="togglePS5(this)"
+  data-tooltip="Cannot be used with vertical supports or when an integrated screen mount is selected."
+>
+  PS5 Holder <span class="price">(₹1,500)</span>
+</button>
+
+</div>
+
+<h3>Castor Wheels</h3>
+
+<!-- GT SPEC WHEELS -->
+<div class="gt-only">
+
+  <button
+    onclick="selectWheels('GT_Wheels_4.glb', this)"
+    data-tooltip="Paintable in any color. Lockable design keeps the cockpit firmly in place."
+  >
+    4 Wheels <span class="price">(₹4,000)</span>
+  </button>
+
+  <button
+    onclick="selectWheels('GT_Wheels_6.glb', this)"
+    data-tooltip="Paintable in any color. Lockable design keeps the cockpit firmly in place. Recommended for users over 100 kg."
+  >
+    6 Wheels <span class="price">(₹6,000)</span>
+  </button>
+
+</div>
+
+<!-- KART SPEC WHEELS -->
+<div class="kart-only">
+
+  <button
+    onclick="selectWheels('GT_Wheels_4.glb', this)"
+    data-tooltip="Paintable in any color. Lockable design keeps the cockpit firmly in place. Cannot be used with vertical supports."
+  >
+    4 Wheels <span class="price">(₹4,000)</span>
+  </button>
+
+  <button
+    onclick="selectWheels('GT_Wheels_6.glb', this)"
+    data-tooltip="Paintable in any color. Lockable design keeps the cockpit firmly in place. Recommended for users over 100 kg. Cannot be used with vertical supports."
+  >
+    6 Wheels <span class="price">(₹6,000)</span>
+  </button>
+
+</div>
+
+</div>
+
+<div id="totalPrice">₹20,000</div>
+
+<button id="finalizeBtn">Finalize Build</button>
+
+<div id="overlay">
+  <div class="overlay-card">
+    <button class="close-overlay">✕</button>
+    <h2>Your MIR RIG Build</h2>
+    <div id="buildSummary"></div>
+    <div class="overlay-price" id="overlayPrice"></div>
+    <p class="overlay-note">
+      Screenshot this and send it to MIR_RIGS on Instagram or at +919999071077 on Whatsapp to finalize your order.
+    </p>
+  </div>
+</div>
+
+<script type="module" src="main.js"></script>
+<div id="tooltip"></div>
+
+<div id="rotateOverlay">
+<div class="rotateContent">
+  <div class="rotateLogo">MIR RIGS</div>
+    <div class="rotateIcon">📱↻</div>
+    <div class="rotateText">
+      Rotate your phone<br>
+      for the best experience
+    </div>
+  </div>
+</div>
+
+<div id="orbitHint">
+  <span class="arrow">⟲</span>
+  <span class="text">Drag to rotate</span>
+</div>
+
+</body>
+</html>
