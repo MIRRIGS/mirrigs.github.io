@@ -1,0 +1,418 @@
+/* ===== BASE ===== */
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #1f1f1f;
+}
+
+/* ===== LAYOUT ===== */
+.strategy-shell {
+  max-width: 420px;
+  margin: 80px auto 32px;
+  padding: 0 20px;
+}
+
+/* ===== PANELS ===== */
+.strategy-panel {
+  background: #e5e5e5;
+  padding: 18px;
+
+  border: 3px solid #fea700;
+  border-radius: 12px;        
+
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12)
+}
+@media (max-width: 480px) {
+  .strategy-panel {
+    border-width: 1.5px;
+  }
+}
+
+/* ===== HEADINGS ===== */
+h2 {
+  margin: 0 0 14px;
+  font-size: 1.1rem;
+}
+
+h3 {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+/* ===== INPUTS ===== */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+label {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+input {
+  padding: 8px 10px;
+  border: 1px solid #bbb;
+  font-size: 0.9rem;
+}
+
+/* ===== RACE LENGTH TOGGLE ===== */
+
+.race-length-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.race-length-row input {
+  flex: 1;
+}
+
+.race-toggle {
+  display: flex;
+  gap: 4px;
+}
+
+.race-btn {
+  height: 28px;
+  padding: 0 12px;
+
+  font-size: 0.8rem;
+  font-weight: 700;
+
+  background: #e0e0e0;
+  color: #000;
+
+  border: 1px solid #bbb;
+  border-radius: 6px;
+
+  cursor: pointer;
+}
+
+.race-btn.active {
+  background: #fea700;
+  border-color: #fea700;
+  color: #000;
+}
+
+/* ===== DIVIDER ===== */
+.divider {
+  height: 1px;
+  background: #cfcfcf;
+  margin: 18px 0 12px;
+}
+
+/* ===== TIRES ===== */
+.tire-block {
+  display: grid;
+grid-template-columns: 6px 64px minmax(120px, 1fr) minmax(120px, 1fr);
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.tire-block input {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 0.8rem;
+  box-sizing: border-box;
+}
+
+.tire-header {
+  opacity: 0.55;
+  font-size: 0.65rem;
+  margin-bottom: 4px;
+  display: grid;
+grid-template-columns: 6px 64px minmax(120px, 1fr) minmax(120px, 1fr);
+  gap: 8px;
+}
+
+.tire-name {
+  font-weight: 600;
+  font-size: 0.75rem;
+  opacity: 0.7;
+  text-transform: none;  
+  white-space: nowrap;
+}
+
+.tire-marker {
+  width: 4px;
+  height: 28px;
+  border-radius: 2px;
+}
+
+.tire-marker.soft {
+  background: #f10c45; /* red */
+}
+
+.tire-marker.medium {
+  background: #f5c400; /* yellow */
+}
+
+.tire-marker.hard {
+  background: #eaeaea;
+  border: 1px solid #bbb;
+}
+
+/* ===== TOP BAR (MATCHES 3D VIEWER) ===== */
+
+#topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 48px;
+  background: #000;
+  z-index: 20;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+
+  padding-right: 200px; /* ← THIS is the magic */
+}
+
+/* LEFT SIDE */
+#specSwitch {
+  margin-right: auto;
+  display: flex;
+  gap: 10px;
+  padding-left: 20px;
+}
+
+/* RIGHT SIDE */
+#rightBlock {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+#rightBlock #logo {
+  margin-right: 2px;
+}
+/* LOGO */
+#logo {
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+
+/* SOCIAL ICONS — IDENTICAL TO 3D VIEWER */
+#socials {
+  display: flex;
+  gap: 14px;
+}
+
+#socials a {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#socials svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.8;
+  opacity: 0.85;
+}
+
+#socials a:hover svg {
+  opacity: 0.6;
+}
+/* === 3D VIEWER BUTTON — MATCH SPEC BUTTON SIZE === */
+
+.viewer-btn {
+  height: 30px;              /* 👈 THIS was the missing piece */
+  padding: 0 14px;           /* tighter like spec buttons */
+  min-width: auto;
+
+  background: #fff;
+  color: #000;
+
+  border: 2px solid #ccc;
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;            /* kills vertical inflation */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  cursor: pointer;
+  text-decoration: none;
+}
+
+/* Cube icon scale */
+.viewer-3d .cube-icon {
+  width: 13px;
+  height: 13px;
+
+  fill: none;
+  stroke: #000;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/* Hover polish — subtle, premium */
+.viewer-3d:hover .cube-icon {
+  opacity: 1;
+}
+
+.spec-btn.active {
+  background: #1677ff;
+  color: #fff;
+  border-color: #fff;
+}
+
+/* === TOP BAR BUTTONS (MATCH 3D VIEWER) === */
+
+.spec-btn.active {
+  background: #1677ff;
+  color: #fff;
+  border-color: #fff;
+}
+
+/* Viewer button stays neutral */
+.viewer-btn:hover {
+  border-color: #fff;
+}
+
+/* === FORCE MIR TOPBAR ICON STYLE (NO OVERRIDES) === */
+
+#topbar #socials svg {
+  fill: none !important;
+  stroke: #ffffff !important;
+  stroke-width: 1.8 !important;
+  opacity: 0.85;
+}
+
+#topbar #socials a:hover svg {
+  opacity: 0.6;
+}
+input {
+  padding: 6px 8px;
+  border: 1px solid #bbb;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  background: #fff;
+  text-align: center;
+}
+
+input:focus {
+  outline: none;
+  border-color: #1677ff;
+}
+
+/* ===== CALCULATE / CLEAR BUTTON ROW ===== */
+
+.calc-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  align-items: stretch;
+}
+
+.calc-actions button {
+  flex: 1;
+  height: 44px;
+
+  margin: 0;
+  padding: 0 18px;
+
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1;
+
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Clear All = RED */
+#clearBtn {
+  background: #f10c45;
+  color: #fff;
+}
+
+/* Calculate = BLUE */
+#calcBtn {
+  background: #1677ff;
+  color: #fff;
+}
+
+/* ===== RESULTS ===== */
+
+.results {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.result-card {
+  background: #fff;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.result-card.best {
+  border-color: #fea700;
+  background: #fff8e6;
+}
+
+.result-title {
+  font-weight: 800;
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+}
+
+.result-meta {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  margin-bottom: 6px;
+}
+
+.result-strategy {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* ===== FORM ERRORS ===== */
+
+.field.has-error input {
+  border-color: #f10c45;
+}
+
+.error-msg {
+  color: #f10c45;
+  font-size: 0.65rem;
+  margin-left: 6px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.error-msg {
+  color: #f10c45;
+  font-size: 0.65rem;
+  margin-left: 6px;
+  white-space: nowrap;
+}
