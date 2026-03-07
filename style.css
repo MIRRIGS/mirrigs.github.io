@@ -432,7 +432,7 @@ hr {
   line-height: 1.4;
 
   border-radius: 12px;
-  border: 2px solid rgba(255,255,255,0.12);
+  border: 2px solid #fea700;
 
   pointer-events: none;
   opacity: 0;

@@ -13,12 +13,27 @@
 /* ── Page ── */
 body, html {
   font-family: system-ui, sans-serif;
+  height: 100%;
+  overflow: hidden;
 }
 
 .about-page {
   background: #1f1f1f;
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
   color: #ffffff;
+}
+
+
+/* ── Page scroll container — keeps scrollbar below topbar ── */
+.page-scroll {
+  position: fixed;
+  top: 48px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* =========================================================
@@ -68,22 +83,23 @@ body, html {
 }
 
 #logoDropdownBtn {
-  background: transparent;
-  border: none;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.18);
   color: #fff;
   font-weight: 800;
-  font-size: 14px;
+  font-size: 13px;
   letter-spacing: 2px;
   white-space: nowrap;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: opacity 0.15s ease;
+  padding: 6px 14px;
+  border-radius: 999px;
+  transition: background 0.15s ease, border-color 0.15s ease;
   font-family: system-ui, sans-serif;
 }
 
 #logoDropdownBtn:hover {
-  opacity: 0.75;
+  background: rgba(255,255,255,0.13);
+  border-color: rgba(255,255,255,0.35);
 }
 
 .dropdown-menu {

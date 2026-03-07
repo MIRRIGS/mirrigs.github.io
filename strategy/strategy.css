@@ -8,7 +8,20 @@ body, html {
   font-family: system-ui, sans-serif;
   background: #1f1f1f;
   color: #ffffff;
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
+}
+
+
+/* ── Page scroll container — keeps scrollbar below topbar ── */
+.page-scroll {
+  position: fixed;
+  top: 48px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* =========================================================
