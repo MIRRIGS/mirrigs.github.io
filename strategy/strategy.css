@@ -37,7 +37,6 @@ body, html {
   z-index: 20;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 0 20px;
   box-sizing: border-box;
   gap: 12px;
@@ -152,27 +151,33 @@ body, html {
   display: flex;
   align-items: center;
   gap: 14px;
-  flex-shrink: 0;
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 #logoDropdownWrap { position: relative; }
 
 #logoDropdownBtn {
-  background: transparent;
-  border: none;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.18);
   color: #fff;
   font-weight: 800;
-  font-size: 14px;
+  font-size: 13px;
   letter-spacing: 2px;
   white-space: nowrap;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: opacity 0.15s ease;
+  padding: 6px 14px;
+  border-radius: 999px;
+  transition: background 0.15s ease, border-color 0.15s ease;
   font-family: system-ui, sans-serif;
 }
 
-#logoDropdownBtn:hover { opacity: 0.75; }
+#logoDropdownBtn:hover {
+  background: rgba(255,255,255,0.13);
+  border-color: rgba(255,255,255,0.35);
+}
 
 .dropdown-menu {
   position: absolute;
@@ -567,7 +572,6 @@ input[type="number"]:focus {
 
 @media (max-width: 700px) {
   #topbar { padding: 0 12px; gap: 8px; }
-  #logoDropdownBtn { font-size: 11px; letter-spacing: 1px; }
   #socials a { width: 20px; height: 20px; }
   .spec-btn { min-width: 56px; padding: 0 12px; font-size: 11px; height: 28px; }
 

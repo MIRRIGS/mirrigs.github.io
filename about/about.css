@@ -50,7 +50,6 @@ body, html {
   z-index: 20;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 0 20px;
   box-sizing: border-box;
   gap: 12px;
@@ -59,7 +58,7 @@ body, html {
 #specSwitch {
   display: flex;
   gap: 8px;
-  flex-shrink: 0;
+  flex: 1;
   align-items: center;
 }
 
@@ -75,12 +74,16 @@ body, html {
   display: flex;
   align-items: center;
   gap: 14px;
-  flex-shrink: 0;
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 #logoDropdownWrap {
   position: relative;
 }
+
 
 #logoDropdownBtn {
   background: rgba(255,255,255,0.07);
@@ -382,7 +385,6 @@ body, html {
 
 .ab-contact-inner {
   display: flex;
-  justify-content: space-between;
   align-items: flex-end;
   gap: 40px;
 }
@@ -432,6 +434,16 @@ body, html {
 
 /* ── Mobile ── */
 @media (max-width: 700px) {
+  #topbar {
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  #socials a {
+    width: 20px;
+    height: 20px;
+  }
+
   .ab-hero,
   .ab-section,
   .ab-india,
@@ -462,5 +474,16 @@ body, html {
 
   .ab-color-blocks {
     display: none;
+  }
+}
+
+@media (orientation: portrait) {
+  #topbar {
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  #specSwitch {
+    flex: 1;
   }
 }
