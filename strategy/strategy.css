@@ -1,67 +1,309 @@
-/* ===== BASE ===== */
-body {
-  margin: 0;
+/* =========================================================
+   strategy.css — Race Strategy page, standalone
+   ========================================================= */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body, html {
   font-family: system-ui, sans-serif;
   background: #1f1f1f;
+  color: #ffffff;
+  min-height: 100vh;
 }
 
-/* ===== LAYOUT ===== */
-.strategy-shell {
-  max-width: 420px;
-  margin: 80px auto 32px;
+/* =========================================================
+   TOPBAR
+   ========================================================= */
+
+#topbar {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 48px;
+  background: #000;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 0 20px;
+  box-sizing: border-box;
+  gap: 12px;
 }
 
-/* ===== PANELS ===== */
-.strategy-panel {
-  background: #e5e5e5;
-  padding: 18px;
-
-  border: 3px solid #fea700;
-  border-radius: 12px;        
-
-  box-shadow: 0 4px 10px rgba(0,0,0,0.12)
-}
-@media (max-width: 480px) {
-  .strategy-panel {
-    border-width: 1.5px;
-  }
+#specSwitch {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  align-items: center;
 }
 
-/* ===== HEADINGS ===== */
-h2 {
-  margin: 0 0 14px;
-  font-size: 1.1rem;
+.spec-btn {
+  height: 32px;
+  min-width: 70px;
+  padding: 0 16px;
+  background: #fff;
+  color: #000;
+  border: 2px solid #ccc;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: system-ui, sans-serif;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-h3 {
-  margin: 0 0 10px;
-  font-size: 0.85rem;
-  opacity: 0.7;
+.spec-btn.active {
+  background: #1677ff;
+  color: #fff;
+  border-color: #fff;
+}
+
+/* ── Beta badge ── */
+.beta-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.beta-badge {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  color: #f10c45;
+  background: rgba(241,12,69,0.1);
+  border: 1px solid rgba(241,12,69,0.35);
+  border-radius: 5px;
+  padding: 3px 7px;
+  cursor: default;
+  user-select: none;
 }
 
-/* ===== INPUTS ===== */
+.beta-tooltip {
+  display: block;
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+  width: 240px;
+  background: #1a1a1a;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 20px 22px;
+  z-index: 999;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  pointer-events: none;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+.beta-tooltip.visible {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: all;
+}
+
+.beta-tooltip-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 8px;
+}
+
+.beta-tooltip-body {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+
+.beta-tooltip-link {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f10c45;
+  text-decoration: none;
+  border: 1px solid rgba(241,12,69,0.3);
+  border-radius: 8px;
+  padding: 6px 12px;
+  transition: background 0.15s ease;
+}
+
+.beta-tooltip-link:hover {
+  background: rgba(241,12,69,0.1);
+}
+
+#rightBlock {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+#logoDropdownWrap { position: relative; }
+
+#logoDropdownBtn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 2px;
+  white-space: nowrap;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: opacity 0.15s ease;
+  font-family: system-ui, sans-serif;
+}
+
+#logoDropdownBtn:hover { opacity: 0.75; }
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 200px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 999;
+}
+
+.dropdown-menu.show { opacity: 1; pointer-events: all; transform: translateY(0); }
+
+.dropdown-item {
+  display: block;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: background 0.1s ease, border-color 0.1s ease;
+  font-family: system-ui, sans-serif;
+}
+
+.dropdown-item:hover { background: #f5f5f5; border-left-color: #1677ff; }
+.dropdown-item.active { border-left-color: #f10c45; color: #f10c45; }
+
+#socials { display: flex; gap: 12px; }
+
+#socials a {
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+#socials svg {
+  width: 100%; height: 100%;
+  fill: none; stroke: #fff;
+  stroke-width: 1.8; opacity: 0.85;
+  shape-rendering: geometricPrecision;
+}
+
+#socials a:hover svg { opacity: 0.6; }
+
+/* =========================================================
+   LAYOUT
+   ========================================================= */
+
+.strategy-shell {
+  display: grid;
+  grid-template-columns: 440px 1fr;
+  gap: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 68px 24px 48px;
+  align-items: start;
+}
+
+/* =========================================================
+   INPUT PANEL
+   ========================================================= */
+
+.strategy-panel {
+  background: #1a1a1a;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 24px;
+  position: sticky;
+  top: 64px;
+}
+
+.section-label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 14px;
+}
+
+.panel-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.07);
+  margin: 20px 0;
+}
+
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
   margin-bottom: 12px;
 }
 
 label {
-  font-size: 0.75rem;
-  opacity: 0.7;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.45);
+  font-weight: 500;
 }
 
-input {
-  padding: 8px 10px;
-  border: 1px solid #bbb;
+input[type="number"] {
+  width: 100%;
+  padding: 9px 12px;
+  background: #242424;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: #ffffff;
   font-size: 0.9rem;
+  font-family: system-ui, sans-serif;
+  -moz-appearance: textfield;
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
 
-/* ===== RACE LENGTH TOGGLE ===== */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+input[type="number"]::placeholder { color: rgba(255,255,255,0.18); }
+
+input[type="number"]:focus {
+  outline: none;
+  border-color: #fea700;
+  background: #2a2a2a;
+}
+
+.field.has-error input[type="number"] { border-color: #f10c45; }
+
+.error-msg {
+  color: #f10c45;
+  font-size: 0.65rem;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.fields-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
 
 .race-length-row {
   display: flex;
@@ -69,350 +311,274 @@ input {
   align-items: center;
 }
 
-.race-length-row input {
-  flex: 1;
-}
+.race-length-row input { flex: 1; }
 
-.race-toggle {
-  display: flex;
-  gap: 4px;
-}
+.race-toggle { display: flex; gap: 4px; flex-shrink: 0; }
 
 .race-btn {
-  height: 28px;
+  height: 38px;
   padding: 0 12px;
-
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 700;
-
-  background: #e0e0e0;
-  color: #000;
-
-  border: 1px solid #bbb;
-  border-radius: 6px;
-
+  letter-spacing: 1px;
+  background: #2a2a2a;
+  color: rgba(255,255,255,0.4);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
   cursor: pointer;
+  font-family: system-ui, sans-serif;
+  transition: all 0.15s ease;
 }
 
 .race-btn.active {
   background: #fea700;
   border-color: #fea700;
   color: #000;
-}
-
-/* ===== DIVIDER ===== */
-.divider {
-  height: 1px;
-  background: #cfcfcf;
-  margin: 18px 0 12px;
-}
-
-/* ===== TIRES ===== */
-.tire-block {
-  display: grid;
-grid-template-columns: 6px 64px minmax(120px, 1fr) minmax(120px, 1fr);
-  gap: 8px;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.tire-block input {
-  width: 100%;
-  padding: 6px 8px;
-  font-size: 0.8rem;
-  box-sizing: border-box;
-}
-
-.tire-header {
-  opacity: 0.55;
-  font-size: 0.65rem;
-  margin-bottom: 4px;
-  display: grid;
-grid-template-columns: 6px 64px minmax(120px, 1fr) minmax(120px, 1fr);
-  gap: 8px;
-}
-
-.tire-name {
-  font-weight: 600;
-  font-size: 0.75rem;
-  opacity: 0.7;
-  text-transform: none;  
-  white-space: nowrap;
-}
-
-.tire-marker {
-  width: 4px;
-  height: 28px;
-  border-radius: 2px;
-}
-
-.tire-marker.soft {
-  background: #f10c45; /* red */
-}
-
-.tire-marker.medium {
-  background: #f5c400; /* yellow */
-}
-
-.tire-marker.hard {
-  background: #eaeaea;
-  border: 1px solid #bbb;
-}
-
-/* ===== TOP BAR (MATCHES 3D VIEWER) ===== */
-
-#topbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 48px;
-  background: #000;
-  z-index: 20;
-
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 16px;
-
-  padding-right: 200px; /* ← THIS is the magic */
-}
-
-/* LEFT SIDE */
-#specSwitch {
-  margin-right: auto;
-  display: flex;
-  gap: 10px;
-  padding-left: 20px;
-}
-
-/* RIGHT SIDE */
-#rightBlock {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-#rightBlock #logo {
-  margin-right: 2px;
-}
-/* LOGO */
-#logo {
-  color: #fff;
   font-weight: 800;
-  letter-spacing: 2px;
-  white-space: nowrap;
 }
 
-/* SOCIAL ICONS — IDENTICAL TO 3D VIEWER */
-#socials {
-  display: flex;
-  gap: 14px;
-}
-
-#socials a {
-  width: 24px;
-  height: 24px;
-  display: flex;
+/* ── Tire rows ── */
+.tire-header,
+.tire-row {
+  display: grid;
+  grid-template-columns: 8px 58px 1fr 1fr;
+  gap: 8px;
   align-items: center;
-  justify-content: center;
+  margin-bottom: 8px;
 }
 
-#socials svg {
-  width: 100%;
-  height: 100%;
-  fill: none;
-  stroke: #fff;
-  stroke-width: 1.8;
-  opacity: 0.85;
-}
-
-#socials a:hover svg {
-  opacity: 0.6;
-}
-/* === 3D VIEWER BUTTON — MATCH SPEC BUTTON SIZE === */
-
-.viewer-btn {
-  height: 30px;              /* 👈 THIS was the missing piece */
-  padding: 0 14px;           /* tighter like spec buttons */
-  min-width: auto;
-
-  background: #fff;
-  color: #000;
-
-  border: 2px solid #ccc;
-  border-radius: 999px;
-
-  font-size: 13px;
+.tire-col-label {
+  font-size: 0.6rem;
   font-weight: 700;
-  line-height: 1;            /* kills vertical inflation */
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-
-  cursor: pointer;
-  text-decoration: none;
-}
-
-/* Cube icon scale */
-.viewer-3d .cube-icon {
-  width: 13px;
-  height: 13px;
-
-  fill: none;
-  stroke: #000;
-  stroke-width: 1.5;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-}
-
-/* Hover polish — subtle, premium */
-.viewer-3d:hover .cube-icon {
-  opacity: 1;
-}
-
-.spec-btn.active {
-  background: #1677ff;
-  color: #fff;
-  border-color: #fff;
-}
-
-/* === TOP BAR BUTTONS (MATCH 3D VIEWER) === */
-
-.spec-btn.active {
-  background: #1677ff;
-  color: #fff;
-  border-color: #fff;
-}
-
-/* Viewer button stays neutral */
-.viewer-btn:hover {
-  border-color: #fff;
-}
-
-/* === FORCE MIR TOPBAR ICON STYLE (NO OVERRIDES) === */
-
-#topbar #socials svg {
-  fill: none !important;
-  stroke: #ffffff !important;
-  stroke-width: 1.8 !important;
-  opacity: 0.85;
-}
-
-#topbar #socials a:hover svg {
-  opacity: 0.6;
-}
-input {
-  padding: 6px 8px;
-  border: 1px solid #bbb;
-  font-size: 0.8rem;
-  border-radius: 4px;
-  background: #fff;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.22);
   text-align: center;
 }
 
-input:focus {
-  outline: none;
-  border-color: #1677ff;
+.tire-row input { text-align: center; }
+
+/* Tire dots in input panel — racing colors */
+.tire-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-/* ===== CALCULATE / CLEAR BUTTON ROW ===== */
+.tire-dot.soft   { background: #ff3333; }
+.tire-dot.medium { background: #f5c400; }
+.tire-dot.hard   { background: #ffffff; }
 
+.tire-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+}
+
+/* ── Action buttons ── */
 .calc-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 14px;
-  align-items: stretch;
+  gap: 8px;
+  margin-top: 24px;
 }
 
 .calc-actions button {
-  flex: 1;
-  height: 44px;
-
-  margin: 0;
-  padding: 0 18px;
-
-  font-size: 1.05rem;
-  font-weight: 800;
-  line-height: 1;
-
+  height: 46px;
   border: none;
-  border-radius: 6px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  font-family: system-ui, sans-serif;
   cursor: pointer;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: opacity 0.15s ease;
 }
 
-/* Clear All = RED */
+.calc-actions button:hover { opacity: 0.85; }
+.calc-actions button:disabled { opacity: 0.5; cursor: not-allowed; }
+
 #clearBtn {
-  background: #f10c45;
-  color: #fff;
+  flex: 1;
+  background: #2a2a2a;
+  color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
-/* Calculate = BLUE */
 #calcBtn {
+  flex: 2;
   background: #1677ff;
   color: #fff;
 }
 
-/* ===== RESULTS ===== */
+/* =========================================================
+   RESULTS
+   ========================================================= */
 
 .results {
-  margin-top: 18px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+}
+
+.results-placeholder {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(255,255,255,0.08);
+  border-radius: 16px;
+}
+
+.placeholder-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.15);
 }
 
 .result-card {
-  background: #fff;
-  border: 2px solid #ddd;
-  border-radius: 10px;
-  padding: 12px;
+  background: #1a1a1a;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 20px 22px;
 }
 
 .result-card.best {
   border-color: #fea700;
-  background: #fff8e6;
+  background: #1d1b14;
 }
 
-.result-title {
-  font-weight: 800;
-  font-size: 0.85rem;
-  margin-bottom: 6px;
+.result-rank {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.28);
+  margin-bottom: 8px;
 }
+
+.result-card.best .result-rank { color: #fea700; }
+
+.result-time {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  color: #ffffff;
+  margin-bottom: 4px;
+  line-height: 1;
+}
+
+.result-card.best .result-time { color: #fea700; }
 
 .result-meta {
   font-size: 0.75rem;
-  opacity: 0.75;
-  margin-bottom: 6px;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 14px;
 }
 
-.result-strategy {
-  font-size: 0.8rem;
+/* ── Strategy sequence ── */
+.result-sequence {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Tire stint pill */
+.stint-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #242424;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 0.78rem;
   font-weight: 600;
+  color: rgba(255,255,255,0.7);
 }
 
-/* ===== FORM ERRORS ===== */
-
-.field.has-error input {
-  border-color: #f10c45;
+/* Dot inside stint pill — sized down from input dots */
+.stint-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.error-msg {
-  color: #f10c45;
-  font-size: 0.65rem;
-  margin-left: 6px;
-  font-weight: 600;
+/* Arrow between sequence items */
+.seq-arrow {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.2);
+  flex-shrink: 0;
+  line-height: 1;
+  align-self: center;
+}
+
+/* Fuel % shown inside a stint pill after tire change */
+.stint-fuel {
+  color: #fea700;
+  font-weight: 700;
+  font-size: 0.75rem;
+  margin-left: 2px;
+}
+
+/* Unplanned fuel-only stop pill */
+.pit-fuel-only {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fea700;
+  background: rgba(254, 167, 0, 0.1);
+  border: 1px solid rgba(254, 167, 0, 0.3);
+  border-radius: 6px;
+  padding: 4px 9px;
   white-space: nowrap;
 }
 
-.error-msg {
-  color: #f10c45;
-  font-size: 0.65rem;
-  margin-left: 6px;
-  white-space: nowrap;
+.result-message {
+  background: #1a1a1a;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 20px 22px;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.4);
+}
+
+.result-message.error {
+  border-color: rgba(241,12,69,0.25);
+  color: rgba(241,12,69,0.7);
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+  #topbar { padding: 0 12px; gap: 8px; }
+  #logoDropdownBtn { font-size: 11px; letter-spacing: 1px; }
+  #socials a { width: 20px; height: 20px; }
+  .spec-btn { min-width: 56px; padding: 0 12px; font-size: 11px; height: 28px; }
+
+  .strategy-shell {
+    grid-template-columns: 1fr;
+    padding: 64px 16px 48px;
+    gap: 16px;
+  }
+
+  .strategy-panel {
+    position: static;
+    border-top: 2px solid #fea700;
+    border-radius: 0 0 16px 16px;
+    border-left: none;
+    border-right: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  .fields-row { grid-template-columns: 1fr; }
+
+  .tire-header,
+  .tire-row {
+    grid-template-columns: 8px 52px 1fr 1fr;
+    gap: 6px;
+  }
 }

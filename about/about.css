@@ -16,7 +16,7 @@ body, html {
 }
 
 .about-page {
-  background: #0a0a0a;
+  background: #1f1f1f;
   min-height: 100vh;
   color: #ffffff;
 }
@@ -182,7 +182,7 @@ body, html {
 /* ── Labels ── */
 .ab-eyebrow {
   display: block;
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 3px;
   text-transform: uppercase;
@@ -269,20 +269,20 @@ body, html {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 2px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.08);
   border-radius: 16px;
   overflow: hidden;
   margin-top: 40px;
 }
 
 .ab-feature-card {
-  background: #111111;
+  background: #2a2a2a;
   padding: 40px 36px;
   transition: background 0.2s ease;
 }
 
 .ab-feature-card:hover {
-  background: #161616;
+  background: #303030;
 }
 
 .ab-num {
@@ -290,13 +290,13 @@ body, html {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: #fea700;
+  background-color: #f10c45;
   margin-bottom: 18px;
 }
 
 /* ── India section ── */
 .ab-india {
-  background: #0d0d0d;
+  background: #252525;
   border-top: 1px solid rgba(255,255,255,0.07);
   border-bottom: 1px solid rgba(255,255,255,0.07);
 }
@@ -321,7 +321,7 @@ body, html {
 .ab-india-flag-bar {
   width: 100%;
   height: 4px;
-  background: #f10c45;
+  background: #fea700;
   border-radius: 2px;
 }
 
@@ -333,7 +333,7 @@ body, html {
 }
 
 .ab-compat-item {
-  background: #111111;
+  background: #2a2a2a;
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 10px;
   padding: 20px 18px;

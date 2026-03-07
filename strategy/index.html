@@ -2,45 +2,52 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>GT7 Strategy Calculator – MIR RIGS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MIR RIGS – Race Strategy</title>
 
-  <link rel="icon" href="/favicon.png">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
 
-  <!-- Reuse global look -->
-  <link rel="stylesheet" href="../style.css">
-  <link rel="stylesheet" href="strategy.css">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="MIR RIGS – Race Strategy">
+  <meta property="og:description" content="GT7 race strategy calculator. Find the fastest pit stop strategy for your race.">
+  <meta property="og:image" content="https://mirrigs.github.io/assets/MIRLOGO.png">
+
+  <link rel="stylesheet" href="strategy.css" />
 </head>
 
 <body>
 
 <!-- ===== TOP BAR ===== -->
 <div id="topbar">
-
-  <!-- LEFT -->
   <div id="specSwitch">
     <button class="spec-btn active">GT7</button>
+    <div class="beta-wrap" id="betaWrap">
+      <span class="beta-badge" id="betaBadge">BETA</span>
+      <div class="beta-tooltip" id="betaTooltip">
+        <div class="beta-tooltip-title">Work in progress</div>
+        <p class="beta-tooltip-body">Found a bug? Share a screenshot on Instagram and tag us — we'll fix it fast.</p>
+        <a class="beta-tooltip-link" href="https://instagram.com/mir_rigs" target="_blank" rel="noopener">@mir_rigs ↗</a>
+      </div>
+    </div>
   </div>
-
-  <!-- RIGHT -->
   <div id="rightBlock">
-    <a href="/" class="viewer-btn viewer-3d">
-  <svg class="cube-icon" viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M12 2 3 7l9 5 9-5-9-5Z"/>
-    <path d="M3 7v10l9 5v-10L3 7Z"/>
-    <path d="M21 7v10l-9 5v-10l9-5Z"/>
-  </svg>
-  <span>3D Viewer</span>
-</a>
-    <div id="logo">MIR RIGS</div>
-
+    <div id="logoDropdownWrap">
+      <button id="logoDropdownBtn" aria-haspopup="true" aria-expanded="false">
+        MIR RIGS ▾
+      </button>
+      <div id="logoDropdown" class="dropdown-menu" role="menu">
+        <a href="/" class="dropdown-item">3D Viewer</a>
+        <a href="/about" class="dropdown-item">About</a>
+        <a href="/strategy" class="dropdown-item active">Race Strategy</a>
+      </div>
+    </div>
     <div id="socials">
       <a href="https://wa.me/919999071077" target="_blank" aria-label="WhatsApp">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.9c0 1.98.52 3.91 1.5 5.61L2 22l4.66-1.61a9.86 9.86 0 0 0 5.38 1.58h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2Zm5.75 13.55c-.24.68-1.4 1.29-1.92 1.35-.48.06-1.08.09-1.74-.11-.4-.13-.91-.3-1.57-.58-2.76-1.2-4.56-4.13-4.7-4.32-.14-.19-1.12-1.49-1.12-2.84s.71-2.02.96-2.29c.24-.26.54-.33.72-.33h.52c.17 0 .4-.06.62.47.23.56.78 1.94.85 2.08.07.14.11.31.02.5-.09.19-.14.31-.28.48-.14.17-.3.33-.43.45-.14.14-.29.3-.13.59.16.29.72 1.19 1.54 1.93 1.06.94 1.95 1.24 2.24 1.38.29.14.46.12.63-.07.17-.19.72-.84.91-1.13.19-.28.38-.23.63-.14.25.09 1.6.76 1.88.9.28.14.47.21.54.33.07.12.07.69-.17 1.37Z"/>
         </svg>
       </a>
-
       <a href="https://www.instagram.com/mir_rigs" target="_blank" aria-label="Instagram">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 2.2c3.2 0 3.58.01 4.85.07 1.17.06 1.97.24 2.43.41a4.9 4.9 0 0 1 1.77 1.03 4.9 4.9 0 0 1 1.03 1.77c.17.46.35 1.26.41 2.43.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.06 1.17-.24 1.97-.41 2.43a4.9 4.9 0 0 1-1.03 1.77 4.9 4.9 0 0 1-1.77 1.03c-.46.17-1.26.35-2.43.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.06-1.97-.24-2.43-.41a4.9 4.9 0 0 1-1.77-1.03 4.9 4.9 0 0 1-1.03-1.77c-.17-.46-.35-1.26-.41-2.43C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.06-1.17.24-1.97.41-2.43a4.9 4.9 0 0 1 1.03-1.77 4.9 4.9 0 0 1 1.77-1.03c.46-.17 1.26-.35 2.43-.41C8.42 2.21 8.8 2.2 12 2.2Zm0 3.08a6.72 6.72 0 1 0 0 13.44 6.72 6.72 0 0 0 0-13.44Zm0 11.08a4.36 4.36 0 1 1 0-8.72 4.36 4.36 0 0 1 0 8.72Zm5.4-11.55a1.02 1.02 0 1 1 0 2.04 1.02 1.02 0 0 1 0-2.04Z"/>
@@ -53,120 +60,119 @@
 <!-- ===== MAIN ===== -->
 <div class="strategy-shell">
 
-  <!-- LEFT: INPUT BLOCK -->
-  <div class="strategy-panel inputs">
-  <h3>Race Setup</h3>
+  <!-- INPUT PANEL -->
+  <div class="strategy-panel">
 
-  <div class="field">
-    <label>
-      Race Length
-      <span class="error-msg"></span>
-    </label>
+    <div class="section-label">Race Setup</div>
 
-    <div class="race-length-row">
-      <input
-        type="number"
-        id="raceLength"
-        placeholder="Enter Laps">
-
-      <div class="race-toggle">
-        <button type="button" class="race-btn active" data-mode="laps">LAPS</button>
-        <button type="button" class="race-btn" data-mode="time">TIME</button>
+    <div class="field">
+      <label>Race Length <span class="error-msg"></span></label>
+      <div class="race-length-row">
+        <input type="number" id="raceLength" placeholder="Enter value" />
+        <div class="race-toggle">
+          <button type="button" class="race-btn active" data-mode="laps">LAPS</button>
+          <button type="button" class="race-btn" data-mode="time">TIME</button>
+        </div>
       </div>
     </div>
+
+    <div class="field">
+      <label>Pit Stop Time Loss — seconds, including tire change <span class="error-msg"></span></label>
+      <input type="number" id="pitTime" placeholder="e.g. 25" />
+    </div>
+
+    <div class="panel-divider"></div>
+
+    <div class="section-label">Fuel</div>
+
+    <div class="fields-row">
+      <div class="field">
+        <label>Fuel Per Lap <span class="error-msg"></span></label>
+        <input type="number" id="fuelPerLap" step="0.1" placeholder="litres per lap" />
+      </div>
+      <div class="field">
+        <label>Starting Fuel <span class="error-msg"></span></label>
+        <input type="number" id="startingFuel" step="1" placeholder="litres at start" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Refuel Rate — litres per second <span class="error-msg"></span></label>
+      <input type="number" id="refuelRate" step="0.1" placeholder="e.g. 2.5" />
+    </div>
+
+    <div class="panel-divider"></div>
+
+    <div class="section-label">Tires</div>
+
+    <div class="tire-header">
+      <div></div>
+      <div></div>
+      <div class="tire-col-label">Lap Time (s)</div>
+      <div class="tire-col-label">Usable Laps</div>
+    </div>
+
+    <div class="tire-row">
+      <div class="tire-dot soft"></div>
+      <div class="tire-name">Soft</div>
+      <input type="number" id="softLap" placeholder="seconds" />
+      <input type="number" id="softLife" placeholder="laps" />
+    </div>
+
+    <div class="tire-row">
+      <div class="tire-dot medium"></div>
+      <div class="tire-name">Medium</div>
+      <input type="number" id="medLap" placeholder="seconds" />
+      <input type="number" id="medLife" placeholder="laps" />
+    </div>
+
+    <div class="tire-row">
+      <div class="tire-dot hard"></div>
+      <div class="tire-name">Hard</div>
+      <input type="number" id="hardLap" placeholder="seconds" />
+      <input type="number" id="hardLife" placeholder="laps" />
+    </div>
+
+    <div class="calc-actions">
+      <button id="clearBtn">Clear</button>
+      <button id="calcBtn">Calculate</button>
+    </div>
+
   </div>
 
-  <div class="field">
-    <label>
-      Pit Stop Loss (Tires Only)
-      <span class="error-msg"></span>
-    </label>
-    <input
-      type="number"
-      id="pitTime"
-      placeholder="Total Time Lost For A Tire Change">
-  </div>
-
-  <div class="divider"></div>
-
-  <h3>Fuel</h3>
-
-  <div class="field">
-    <label>
-      Fuel Consumption
-      <span class="error-msg"></span>
-    </label>
-    <input
-      type="number"
-      id="fuelPerLap"
-      step="0.1"
-      placeholder="Fuel Used Per Lap (Percentage)">
-  </div>
-
-  <div class="field">
-    <label>
-      Starting Fuel
-      <span class="error-msg"></span>
-    </label>
-    <input
-      type="number"
-      id="startingFuel"
-      step="1"
-      placeholder="% Of Fuel You Start The Race With">
-  </div>
-
-  <div class="field">
-    <label>
-      Refuelling Rate
-      <span class="error-msg"></span>
-    </label>
-    <input
-      type="number"
-      id="refuelRate"
-      step="0.1"
-      placeholder="Litres Per Second">
-  </div>
-
-  <div class="divider"></div>
-
-  <h3>TIRES</h3>
-
-  <div class="tire-block tire-header">
-    <div></div>
-    <div></div>
-    <div style="font-size:0.65rem; opacity:0.6;">Lap times</div>
-    <div style="font-size:0.65rem; opacity:0.6;">Usable laps</div>
-  </div>
-
-  <div class="tire-block">
-    <div class="tire-marker soft"></div>
-    <div class="tire-name">Soft</div>
-    <input type="number" id="softLap" placeholder="In Secs">
-    <input type="number" id="softLife" placeholder="No. of Laps">
-  </div>
-
-  <div class="tire-block">
-    <div class="tire-marker medium"></div>
-    <div class="tire-name">Medium</div>
-    <input type="number" id="medLap" placeholder="In Secs">
-    <input type="number" id="medLife" placeholder="No. of Laps">
-  </div>
-
-  <div class="tire-block">
-    <div class="tire-marker hard"></div>
-    <div class="tire-name">Hard</div>
-    <input type="number" id="hardLap" placeholder="In Secs">
-    <input type="number" id="hardLife" placeholder="No. of Laps">
-  </div>
-
-  <div class="calc-actions">
-    <button id="clearBtn">Clear All</button>
-    <button id="calcBtn">Calculate</button>
+  <!-- RESULTS -->
+  <div id="results" class="results">
+    <div class="results-placeholder">
+      <div class="placeholder-label">Results appear here</div>
+    </div>
   </div>
 
 </div>
 
-<div id="results" class="results"></div>
+<script>
+  const dropBtn = document.getElementById("logoDropdownBtn");
+  const dropMenu = document.getElementById("logoDropdown");
+  dropBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    const isOpen = dropMenu.classList.toggle("show");
+    dropBtn.setAttribute("aria-expanded", isOpen);
+  });
+  document.addEventListener("click", () => {
+    dropMenu.classList.remove("show");
+    dropBtn.setAttribute("aria-expanded", false);
+  });
+
+  // Beta tooltip — stays open when hovering the tooltip itself so the link is clickable
+  const betaWrap    = document.getElementById("betaWrap");
+  const betaTooltip = document.getElementById("betaTooltip");
+  let betaTimeout;
+  function showBeta() { clearTimeout(betaTimeout); betaTooltip.classList.add("visible"); }
+  function hideBeta() { betaTimeout = setTimeout(() => betaTooltip.classList.remove("visible"), 120); }
+  betaWrap.addEventListener("mouseenter", showBeta);
+  betaWrap.addEventListener("mouseleave", hideBeta);
+  betaTooltip.addEventListener("mouseenter", showBeta);
+  betaTooltip.addEventListener("mouseleave", hideBeta);
+</script>
 
 <script src="strategy.js"></script>
 </body>

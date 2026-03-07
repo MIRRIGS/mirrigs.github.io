@@ -40,14 +40,20 @@ html, body {
   height: 32px;
   min-width: 90px;
   padding: 0 16px;
+
   background: #fff;
   color: #000;
   border: 2px solid #ccc;
   border-radius: 999px;
+
   font-weight: 700;
   font-size: 13px;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .spec-btn.active {
@@ -70,21 +76,22 @@ html, body {
 }
 
 #logoDropdownBtn {
-  background: transparent;
-  border: none;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.18);
   color: #fff;
   font-weight: 800;
-  font-size: 14px;
+  font-size: 13px;
   letter-spacing: 2px;
   white-space: nowrap;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: opacity 0.15s ease;
+  padding: 6px 14px;
+  border-radius: 999px;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 #logoDropdownBtn:hover {
-  opacity: 0.75;
+  background: rgba(255,255,255,0.13);
+  border-color: rgba(255,255,255,0.35);
 }
 
 /* ================== DROPDOWN MENU ================== */
@@ -93,14 +100,17 @@ html, body {
   top: calc(100% + 10px);
   right: 0;
   min-width: 180px;
+
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
   overflow: hidden;
+
   opacity: 0;
   pointer-events: none;
   transform: translateY(-6px);
   transition: opacity 0.15s ease, transform 0.15s ease;
+
   z-index: 999;
 }
 
@@ -160,19 +170,29 @@ html, body {
 /* ================== CANVAS ================== */
 canvas { display: block; }
 
-/* ================== UI PANEL ================== */
+/* ================== UI PANEL — LANDSCAPE ================== */
 #ui {
   position: fixed;
   left: 20px;
-  top: calc(var(--topbar-height) + (100vh - var(--topbar-height)) / 2);
+
+  top: calc(
+    var(--topbar-height) +
+    (100vh - var(--topbar-height)) / 2
+  );
   transform: translateY(-50%);
+
   width: 260px;
   max-height: calc(100vh - var(--topbar-height) - 60px);
-  padding: 10px;
-  background: #e5e5e5;
+
+  padding: 14px;
+  background: #1a1a1a;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+
   display: flex;
   flex-direction: column;
   gap: 6px;
+
   overflow-y: auto;
   overflow-x: hidden;
   box-sizing: border-box;
@@ -184,48 +204,71 @@ canvas { display: block; }
   bottom: 0;
   height: 32px;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgba(229,229,229,0), rgba(229,229,229,1));
+  background: linear-gradient(
+    to bottom,
+    rgba(26, 26, 26, 0),
+    rgba(26, 26, 26, 1)
+  );
 }
 
-/* ── h3 scoped to #ui only — does NOT affect about page ── */
+/* ── Section headings ── */
 #ui h3 {
-  margin: 6px 0 2px;
-  font-size: 0.9rem;
-  opacity: 0.7;
+  margin: 8px 0 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  opacity: 1;
 }
 
-/* ── buttons scoped to #ui only — does NOT affect about page ── */
+/* ── All option buttons ── */
 #ui button,
 .gt-only button,
 .kart-only button {
-  padding: 8px 12px;
-  background: #fff;
-  border: 2px solid transparent;
+  padding: 9px 12px;
+  background: #2a2a2a;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
   cursor: pointer;
-  text-align: center;
+  text-align: left;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: system-ui, sans-serif;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+#ui button:hover,
+.gt-only button:hover,
+.kart-only button:hover {
+  background: #333333;
+  border-color: rgba(255,255,255,0.15);
 }
 
 #ui button.active,
 .gt-only button.active,
 .kart-only button.active {
   border-color: #f10c45;
+  background: rgba(241, 12, 69, 0.1);
 }
 
 .gt-only button,
 .kart-only button {
   display: block;
   width: 100%;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
+/* ── Price label inside buttons ── */
 .price {
   font-size: 0.8em;
-  opacity: 0.6;
+  opacity: 0.45;
   margin-left: 6px;
 }
 
-/* ================== COLOR BUTTONS ================== */
-.group { display: flex; gap: 8px; }
+/* ── Color buttons ── */
+.group { display: flex; gap: 6px; }
 
 .color {
   flex: 1;
@@ -233,17 +276,19 @@ canvas { display: block; }
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: #000;
+  color: #ffffff;
 }
 
-.swatch { width: 14px; height: 14px; }
+/* ── Color swatch ── */
+.swatch { width: 12px; height: 12px; border-radius: 2px; }
 .swatch.silver { background: #cfcfcf; }
-.swatch.black  { background: #000; }
+.swatch.black  { background: #444; border: 1px solid rgba(255,255,255,0.2); }
 
+/* ── Divider ── */
 hr {
   border: none;
-  border-top: 1px solid #ccc;
-  margin: 8px 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  margin: 6px 0;
 }
 
 /* ================== TOTAL PRICE ================== */
@@ -251,15 +296,19 @@ hr {
   position: fixed;
   bottom: 70px;
   right: 20px;
+
   width: 220px;
   height: 44px;
   line-height: 44px;
   padding: 0 18px;
+
   background: #f10c45;
   color: #fff;
+
   font-weight: 800;
   text-align: center;
   box-sizing: border-box;
+  border-radius: 10px 10px 0 0;
 }
 
 /* ================== FINALIZE BUTTON ================== */
@@ -267,23 +316,33 @@ hr {
   position: fixed;
   bottom: 20px;
   right: 20px;
+
   width: 220px;
   height: 44px;
   padding: 0 18px;
   font-size: 1.05rem;
+
   background: #1677ff;
   color: #fff;
+
   font-weight: 800;
   border: none;
   cursor: pointer;
   box-sizing: border-box;
+  border-radius: 0 0 10px 10px;
+  font-family: system-ui, sans-serif;
+  transition: opacity 0.15s ease;
+}
+
+#finalizeBtn:hover {
+  opacity: 0.85;
 }
 
 /* ================== OVERLAY ================== */
 #overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.75);
   display: none;
   align-items: center;
   justify-content: center;
@@ -293,35 +352,70 @@ hr {
 #overlay.show { display: flex; }
 
 .overlay-card {
-  background: #fff;
-  padding: 24px 28px;
-  width: min(360px, 90vw);
+  background: #1a1a1a;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 28px 32px;
+  width: min(380px, 90vw);
   position: relative;
   box-sizing: border-box;
+  color: #ffffff;
 }
 
-.overlay-card h2 { margin-top: 0; }
+.overlay-card h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #ffffff;
+}
 
 .close-overlay {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  background: none;
+  top: 14px;
+  right: 14px;
+  background: rgba(255,255,255,0.08);
   border: none;
-  font-size: 18px;
+  border-radius: 6px;
+  font-size: 16px;
   cursor: pointer;
+  color: #fff;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.close-overlay:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+#buildSummary {
+  font-size: 0.9rem;
+  line-height: 2;
+  color: rgba(255,255,255,0.7);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 12px 0;
+  margin-bottom: 4px;
 }
 
 .overlay-price {
   margin-top: 16px;
-  font-size: 1.2rem;
-  font-weight: 800;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #f10c45;
 }
 
 .overlay-note {
-  margin-top: 10px;
-  font-size: 0.85rem;
-  opacity: 0.7;
+  margin-top: 12px;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.6;
 }
 
 /* ================== TOOLTIP ================== */
@@ -329,13 +423,17 @@ hr {
   position: fixed;
   min-width: 200px;
   max-width: 260px;
+
   padding: 10px 14px;
-  background: rgba(31,31,31,0.95);
+  background: rgba(26, 26, 26, 0.97);
   color: #fff;
+
   font-size: 0.85rem;
   line-height: 1.4;
+
   border-radius: 12px;
-  border: 2px solid #fea700;
+  border: 2px solid rgba(255,255,255,0.12);
+
   pointer-events: none;
   opacity: 0;
   transform: translateY(-6px);
@@ -361,14 +459,17 @@ hr {
   position: fixed;
   top: 88px;
   right: 26px;
+
   display: flex;
   align-items: center;
   gap: 10px;
+
   color: #fea700;
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.8px;
   text-transform: uppercase;
+
   opacity: 0.9;
   pointer-events: none;
   z-index: 6;
@@ -399,10 +500,13 @@ body.kart-spec .kart-only { display: block; }
     top: calc(var(--topbar-height) + 12px);
     transform: none;
     max-height: calc(100dvh - var(--topbar-height) - 53px);
+    border-radius: 0 0 14px 14px;
   }
 }
 
-/* ================== PORTRAIT MODE ================== */
+/* =================================================================
+   PORTRAIT MODE
+   ================================================================= */
 @media (orientation: portrait) {
 
   canvas {
@@ -448,12 +552,23 @@ body.kart-spec .kart-only { display: block; }
       - var(--bottom-bar-height)
     );
     border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    border-top: 2px solid rgba(255,255,255,0.12);
     padding: 10px 14px 4px;
     gap: 4px;
-    background: #e5e5e5;
     overflow-y: auto;
     overflow-x: hidden;
     box-sizing: border-box;
+  }
+
+  #ui::after {
+    background: linear-gradient(
+      to bottom,
+      rgba(26, 26, 26, 0),
+      rgba(26, 26, 26, 1)
+    );
   }
 
   #ui button,
@@ -465,8 +580,8 @@ body.kart-spec .kart-only { display: block; }
   }
 
   #ui h3 {
-    font-size: 0.8rem;
-    margin: 4px 0 2px;
+    font-size: 0.65rem;
+    margin: 6px 0 2px;
   }
 
   #totalPrice {

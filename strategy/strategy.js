@@ -1,382 +1,580 @@
-console.log("strategy.js loaded");
+// =====================================================
+//  MIR RIGS — GT7 Race Strategy Calculator  v7
+//
+//  RULES:
+//  - Tank always 100L max. startingFuel ≤ 100.
+//  - pitTime (input) = full stop including 3s tire change.
+//  - Planned tire-change stop = pitTime + refuelTime.
+//  - Unplanned fuel-only stop = (pitTime − 3) + refuelTime.
+//  - TIME mode: race ends at END of lap where time ≥ limit.
+//  - TIME mode: fuel at each stop sized to estimated
+//    remaining laps only.
+//  - Lap 1 counts toward tire wear like every other lap.
+//  - MAX_STINTS computed dynamically per race.
+//  - Fuel displayed in litres (tank = 100L always).
+// =====================================================
 
-// ===================================
-// DOM REFERENCES
-// ===================================
-
-const calcBtn = document.getElementById("calcBtn");
-const clearBtn = document.getElementById("clearBtn");
-const resultsBox = document.getElementById("results");
-
-const raceLength = document.getElementById("raceLength");
-const raceButtons = document.querySelectorAll(".race-btn");
-
-const pitTimeInput = document.getElementById("pitTime");
-const fuelPerLapInput = document.getElementById("fuelPerLap");
-const refuelRateInput = document.getElementById("refuelRate");
+// ── DOM ──────────────────────────────────────────────
+const calcBtn           = document.getElementById("calcBtn");
+const clearBtn          = document.getElementById("clearBtn");
+const resultsBox        = document.getElementById("results");
+const raceLengthInput   = document.getElementById("raceLength");
+const raceButtons       = document.querySelectorAll(".race-btn");
+const pitTimeInput      = document.getElementById("pitTime");
+const fuelPerLapInput   = document.getElementById("fuelPerLap");
+const refuelRateInput   = document.getElementById("refuelRate");
 const startingFuelInput = document.getElementById("startingFuel");
+const softLapI  = document.getElementById("softLap");
+const softLifeI = document.getElementById("softLife");
+const medLapI   = document.getElementById("medLap");
+const medLifeI  = document.getElementById("medLife");
+const hardLapI  = document.getElementById("hardLap");
+const hardLifeI = document.getElementById("hardLife");
 
-const softLap = document.getElementById("softLap");
-const softLife = document.getElementById("softLife");
-const medLap = document.getElementById("medLap");
-const medLife = document.getElementById("medLife");
-const hardLap = document.getElementById("hardLap");
-const hardLife = document.getElementById("hardLife");
-
-// ===================================
-// ERROR HELPERS
-// ===================================
-
-function setError(input, message) {
-  const field = input.closest(".field");
-  if (!field) return;
-  field.classList.add("has-error");
-  const msg = field.querySelector(".error-msg");
-  if (msg) msg.textContent = message;
-}
-
-function clearError(input) {
-  const field = input.closest(".field");
-  if (!field) return;
-  field.classList.remove("has-error");
-  const msg = field.querySelector(".error-msg");
-  if (msg) msg.textContent = "";
-}
-
-function hasErrors() {
-  return document.querySelectorAll(".field.has-error").length > 0;
-}
-
-// ===================================
-// RACE MODE
-// ===================================
-
+// ── Race mode ─────────────────────────────────────────
 let raceMode = "laps";
 
 raceButtons.forEach(btn => {
-  btn.onclick = () => {
+  btn.addEventListener("click", () => {
     raceButtons.forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     raceMode = btn.dataset.mode;
-    raceLength.placeholder =
-      raceMode === "laps" ? "Total Laps" : "Race Length In Mins";
-    raceLength.dispatchEvent(new Event("input"));
-  };
-});
-
-// ===================================
-// INPUT VALIDATION (MINIMAL BUT REAL)
-// ===================================
-
-raceLength.addEventListener("input", () => {
-  const v = Number(raceLength.value);
-  if (!raceLength.value) {
-    setError(raceLength, "Required");
-    return;
-  }
-  if (raceMode === "laps") {
-    v < 1 || v > 200
-      ? setError(raceLength, "1–200 laps")
-      : clearError(raceLength);
-  } else {
-    v < 1 || v > 1440
-      ? setError(raceLength, "1–1440 mins")
-      : clearError(raceLength);
-  }
-});
-
-pitTimeInput.addEventListener("input", () => {
-  Number(pitTimeInput.value) < 0
-    ? setError(pitTimeInput, "≥ 0")
-    : clearError(pitTimeInput);
-});
-
-[fuelPerLapInput, startingFuelInput].forEach(input => {
-  input.addEventListener("input", () => {
-    if (input.value === "") {
-      clearError(input);
-      return;
-    }
-    const v = Number(input.value);
-    v < 0 || v > 100
-      ? setError(input, "0–100")
-      : clearError(input);
+    raceLengthInput.placeholder = raceMode === "laps" ? "Total laps" : "Race length in mins";
+    clearErr(raceLengthInput);
   });
 });
 
-refuelRateInput.addEventListener("input", () => {
-  if (refuelRateInput.value === "") {
-    clearError(refuelRateInput);
-    return;
+// ── Validation ────────────────────────────────────────
+function setErr(input, msg) {
+  const field = input.closest(".field");
+  if (!field) return;
+  field.classList.add("has-error");
+  const span = field.querySelector(".error-msg");
+  if (span) span.textContent = "— " + msg;
+}
+
+function clearErr(input) {
+  const field = input.closest(".field");
+  if (!field) return;
+  field.classList.remove("has-error");
+  const span = field.querySelector(".error-msg");
+  if (span) span.textContent = "";
+}
+
+function validate(input) {
+  if (input.value === "") { clearErr(input); return; }
+  const v = Number(input.value);
+
+  if (input === raceLengthInput) {
+    if (raceMode === "laps")
+      (!Number.isInteger(v) || v < 1 || v > 300) ? setErr(input, "1–300 whole laps") : clearErr(input);
+    else
+      (v < 1 || v > 1440) ? setErr(input, "1–1440 mins") : clearErr(input);
+  } else if (input === pitTimeInput) {
+    v < 3 ? setErr(input, "min 3s (includes tire change)") : clearErr(input);
+  } else if (input === fuelPerLapInput) {
+    (v <= 0 || v > 100) ? setErr(input, "0.1–100 L") : clearErr(input);
+  } else if (input === startingFuelInput) {
+    (v <= 0 || v > 100) ? setErr(input, "1–100 L") : clearErr(input);
+  } else if (input === refuelRateInput) {
+    (v <= 0 || v > 100) ? setErr(input, "0.1–100 L/s") : clearErr(input);
+  } else if ([softLapI, medLapI, hardLapI].includes(input)) {
+    v < 1 ? setErr(input, "≥ 1 sec") : clearErr(input);
+  } else if ([softLifeI, medLifeI, hardLifeI].includes(input)) {
+    v < 1 ? setErr(input, "≥ 1 lap") : clearErr(input);
   }
-  const v = Number(refuelRateInput.value);
-  v < 1 || v > 100
-    ? setError(refuelRateInput, "1–100")
-    : clearError(refuelRateInput);
+}
+
+document.querySelectorAll(".strategy-panel input").forEach(inp => {
+  inp.addEventListener("input", () => validate(inp));
+  inp.addEventListener("blur",  () => validate(inp));
 });
 
-[softLap, medLap, hardLap].forEach(input => {
-  input.addEventListener("input", () => {
-    if (input.value === "") {
-      clearError(input);
-      return;
-    }
-    Number(input.value) < 1
-      ? setError(input, "≥ 1 sec")
-      : clearError(input);
-  });
-});
-
-[softLife, medLife, hardLife].forEach(input => {
-  input.addEventListener("input", () => {
-    Number(input.value) < 0
-      ? setError(input, "≥ 0")
-      : clearError(input);
-  });
-});
-
-// ===================================
-// INPUT COLLECTION
-// ===================================
-
+// ── Collect inputs ────────────────────────────────────
 function getInputs() {
   return {
-    raceValue: Number(raceLength.value),
     raceMode,
-    pitLoss: Number(pitTimeInput.value) || 0,
-    fuelPerLap: Number(fuelPerLapInput.value) || 0,
-    refuelRate: Number(refuelRateInput.value) || 0,
-    startingFuel: Number(startingFuelInput.value) || 0,
+    raceLaps:      raceMode === "laps" ? Number(raceLengthInput.value) : null,
+    raceLimitSecs: raceMode === "time" ? Number(raceLengthInput.value) * 60 : null,
+    pitTime:       Number(pitTimeInput.value)      || 0,
+    fuelPerLap:    Number(fuelPerLapInput.value)   || 0,
+    startingFuel:  Number(startingFuelInput.value) || 100,
+    refuelRate:    Number(refuelRateInput.value)   || 0,
     tires: [
-      { name: "Soft", lap: Number(softLap.value), life: Number(softLife.value) },
-      { name: "Medium", lap: Number(medLap.value), life: Number(medLife.value) },
-      { name: "Hard", lap: Number(hardLap.value), life: Number(hardLife.value) }
+      { name: "Soft",   color: "#ff3333", lap: Number(softLapI.value),  life: Number(softLifeI.value)  },
+      { name: "Medium", color: "#f5c400", lap: Number(medLapI.value),   life: Number(medLifeI.value)   },
+      { name: "Hard",   color: "#ffffff", lap: Number(hardLapI.value),  life: Number(hardLifeI.value)  }
     ].filter(t => t.lap > 0 && t.life > 0)
   };
 }
 
-// ===================================
-// FULL STRATEGY ENGINE (MULTI-STINT + FUEL)
-// ===================================
+// ═══════════════════════════════════════════════════
+//  ALLOCATORS
+//  Each returns an array of lap counts per stint,
+//  or null if the plan can't fit within tire lives.
+// ═══════════════════════════════════════════════════
 
-function calculateStrategies(inputs) {
-  const results = [];
-  let bestTimeSoFar = Infinity;
-
-  // generate stint combinations like:
-  // [{tire, laps}, {tire, laps}, ...]
-  function buildStints(seq, lapsDone, timeDone, depth) {
-   if (lapsDone > inputs.raceValue + 10) return;
-
-    // ----- END CONDITIONS -----
-    if (inputs.raceMode === "laps" && lapsDone === inputs.raceValue) {
-      simulate(seq);
-      return;
-    }
-
-if (
-  inputs.raceMode === "time" &&
-  timeDone >= inputs.raceValue * 60 * 1.2
-) {
-  // allow generator to overshoot ~20%
-  simulate(seq);
-  return;
-}
-
-    for (const tire of inputs.tires) {
-      for (let l = 1; l <= tire.life; l++) {
-        // prevent lap overflow
-        if (
-          inputs.raceMode === "laps" &&
-          lapsDone + l > inputs.raceValue
-        ) continue;
-
-        buildStints(
-          [...seq, { tire, laps: l }],
-          lapsDone + l,
-          timeDone + l * tire.lap,
-          depth + 1
-        );
-      }
-    }
+// Greedy: give the most laps to the fastest compound first.
+// Naturally uses fastest tire most, and (by order) puts it last.
+function allocateGreedy(tireSeq, totalLaps) {
+  const n = tireSeq.length;
+  if (totalLaps < n) return null;
+  const laps = new Array(n).fill(1);
+  let rem = totalLaps - n;
+  const order = [...Array(n).keys()].sort((a, b) => tireSeq[a].lap - tireSeq[b].lap);
+  for (const i of order) {
+    const add = Math.min(rem, tireSeq[i].life - 1);
+    laps[i] += add;
+    rem -= add;
+    if (rem <= 0) break;
   }
-
-  // ===================================
-  // STRATEGY SIMULATION
-  // ===================================
-
-  function simulate(strategy) {
-    let time = 0;
-    let fuel = inputs.startingFuel;
-    let pits = 0;
-    let laps = 0;
-
-    for (let i = 0; i < strategy.length; i++) {
-      const stint = strategy[i];
-
-      for (let lap = 0; lap < stint.laps; lap++) {
-
-   // ---- FUEL CHECK BEFORE LAP ----
-if (inputs.fuelPerLap > 0 && fuel < inputs.fuelPerLap) {
-  // forced pit stop due to fuel
-  pits++;
-
-  let pitTime = inputs.pitLoss;
-
-  // add enough fuel to safely continue (2 laps buffer)
-  const fuelToAdd = Math.min(
-    100 - fuel,
-    inputs.fuelPerLap * 2
-  );
-
-if (inputs.refuelRate > 0) {
-  pitTime += fuelToAdd / inputs.refuelRate;
-}
-  fuel += fuelToAdd;
-  time += pitTime;
-
-  // prune if already slower than best known strategy
-  if (time > bestTimeSoFar) return;
+  if (rem > 0) return null;
+  return laps;
 }
 
-        // ---- RUN LAP ----
-        time += stint.tire.lap;
-        fuel -= inputs.fuelPerLap;
-        laps++;
-
-        // ---- END CONDITIONS ----
-        if (
-          inputs.raceMode === "laps" &&
-          laps === inputs.raceValue
-        ) break;
-
-        if (
-          inputs.raceMode === "time" &&
-          time >= inputs.raceValue * 60
-        ) break;
-      }
-
-      // race finished?
-      if (
-        (inputs.raceMode === "laps" && laps === inputs.raceValue) ||
-        (inputs.raceMode === "time" && time >= inputs.raceValue * 60)
-      ) break;
-
-      // ---- PIT STOP ----
-      if (i < strategy.length - 1) {
-        pits++;
-        let pitTime = inputs.pitLoss;
-
-        const next = strategy[i + 1];
-        const tireChange = stint.tire.name !== next.tire.name;
-
-        if (!tireChange) pitTime -= 3; // same compound rule
-
-        // ---- REFUEL ----
-        if (inputs.fuelPerLap > 0) {
-    // top up to safe buffer for next stint
-const targetFuel =
-  Math.min(100, fuel + next.laps * inputs.fuelPerLap * 1.1);
-
-if (fuel < targetFuel) {
-  const fuelToAdd = targetFuel - fuel;
-if (inputs.refuelRate > 0) {
-  pitTime += fuelToAdd / inputs.refuelRate;
+// LastFull: give the LAST stint its full tire life (capped at remaining laps),
+// then distribute the rest greedily across earlier stints.
+// This ensures softs (placed last) are always used completely.
+function allocateLastFull(tireSeq, totalLaps) {
+  const n = tireSeq.length;
+  if (totalLaps < n) return null;
+  const laps = new Array(n).fill(1);
+  // Last stint: as much of its life as fits
+  const lastMax  = Math.min(tireSeq[n - 1].life, totalLaps - (n - 1));
+  laps[n - 1]    = lastMax;
+  let rem        = totalLaps - lastMax;
+  if (rem < n - 1) return null; // can't fill earlier stints with 1 lap each
+  // Fill earlier stints greedily (fastest first)
+  const order = [...Array(n - 1).keys()].sort((a, b) => tireSeq[a].lap - tireSeq[b].lap);
+  for (const i of order) {
+    const add = Math.min(rem - (n - 2 - i), tireSeq[i].life - 1);
+    if (add < 0) return null;
+    laps[i] += add;
+    rem     -= add;
+    if (rem <= n - 2 - i) break;
+  }
+  if (rem !== n - 1) {
+    // Distribute remainder (1 per earlier stint already accounted for)
+    // This happens when tire lives are limiting — just accept what we have
+  }
+  // Validate
+  for (let i = 0; i < n; i++) {
+    if (laps[i] < 1 || laps[i] > tireSeq[i].life) return null;
+  }
+  if (laps.reduce((a, b) => a + b, 0) !== totalLaps) return null;
+  return laps;
 }
-fuel += fuelToAdd;
+
+// FuelAligned (LAPS mode only): split stints at fuel-tank boundaries
+// to avoid unplanned mid-stint fuel stops.
+function allocateFuelAligned(tireSeq, totalLaps, inp) {
+  if (inp.raceMode !== 'laps') return null; // not used in TIME mode
+  const n = tireSeq.length;
+  if (totalLaps < n) return null;
+  if (!inp.fuelPerLap || inp.fuelPerLap <= 0) return null;
+  const tankLaps = Math.floor(inp.startingFuel / inp.fuelPerLap);
+  if (tankLaps < 1) return null;
+  const laps = new Array(n).fill(0);
+  let rem = totalLaps;
+  for (let i = 0; i < n - 1; i++) {
+    const cap = Math.min(tireSeq[i].life, tankLaps, rem - (n - 1 - i));
+    laps[i] = Math.max(1, cap);
+    rem -= laps[i];
+  }
+  laps[n - 1] = rem;
+  if (laps[n - 1] < 1 || laps[n - 1] > tireSeq[n - 1].life) return null;
+  return laps;
 }
+
+// ═══════════════════════════════════════════════════
+//  SIMULATION
+// ═══════════════════════════════════════════════════
+//
+//  Events array (chronological):
+//    { kind:'stint',      tire, laps }
+//    { kind:'fuelstop',   fuelAdded, stopTime }   ← unplanned, mid-stint
+//    { kind:'tirechange', fuelAdded, stopTime }   ← planned, end of stint
+//
+function simulate(plan, inp) {
+  let time     = 0;
+  let fuel     = inp.startingFuel;
+  let tirePits = 0;
+  let fuelPits = 0;
+  let lapsDone = 0;
+  const events = [];
+
+  for (let si = 0; si < plan.length; si++) {
+    const { tire, laps: stintLen } = plan[si];
+    let segLaps = 0;
+
+    for (let lap = 0; lap < stintLen; lap++) {
+
+      // ── Unplanned fuel stop ──
+      if (inp.fuelPerLap > 0 && fuel < inp.fuelPerLap) {
+        if (segLaps > 0) {
+          events.push({ kind: 'stint', tire, laps: segLaps });
+          segLaps = 0;
         }
+        fuelPits++;
+        const lapsLeft   = stintLen - lap;
+        const need       = lapsLeft * inp.fuelPerLap;
+        const fuelAdded  = Math.min(100 - fuel, need);
+        const refuelTime = inp.refuelRate > 0 ? fuelAdded / inp.refuelRate : 0;
+        const stopBase   = Math.max(0, inp.pitTime - 3);
+        const stopTime   = stopBase + refuelTime;
+        events.push({ kind: 'fuelstop', fuelAdded, stopTime });
+        time += stopTime;
+        fuel += fuelAdded;
+      }
 
-        time += pitTime;
+      // ── Run lap ──
+      time += tire.lap;
+      fuel  = Math.max(0, fuel - inp.fuelPerLap);
+      lapsDone++;
+      segLaps++;
+
+      // ── Race end ──
+      if (inp.raceMode === 'time' && time >= inp.raceLimitSecs) {
+        events.push({ kind: 'stint', tire, laps: segLaps });
+        return { events, time, tirePits, fuelPits, lapsDone };
+      }
+      if (inp.raceMode === 'laps' && lapsDone >= inp.raceLaps) {
+        events.push({ kind: 'stint', tire, laps: segLaps });
+        return { events, time, tirePits, fuelPits, lapsDone };
       }
     }
 
-if (time < bestTimeSoFar) {
-  bestTimeSoFar = time;
-}
+    if (segLaps > 0) events.push({ kind: 'stint', tire, laps: segLaps });
 
-results.push({
-  strategy,
-  time,
-  pits,
-  laps
-});
+    // ── Planned tire-change stop ──
+    if (si < plan.length - 1) {
+      tirePits++;
+      const next      = plan[si + 1];
+      let   stopTime  = inp.pitTime;
+      let   fuelAdded = 0;
+
+      if (inp.fuelPerLap > 0) {
+        let lapsToFuelFor = next.laps;
+        if (inp.raceMode === 'time') {
+          // Estimate remaining laps from this point to avoid over-fueling
+          const timeAfterStop   = time + inp.pitTime;
+          const drivingTimeLeft = Math.max(0, inp.raceLimitSecs - timeAfterStop);
+          const estLaps         = Math.max(1, Math.ceil(drivingTimeLeft / next.tire.lap));
+          lapsToFuelFor         = Math.min(next.laps, estLaps);
+        }
+        const fuelNeeded = lapsToFuelFor * inp.fuelPerLap;
+        fuelAdded = Math.max(0, Math.min(100 - fuel, fuelNeeded - fuel));
+        if (fuelAdded > 0 && inp.refuelRate > 0) stopTime += fuelAdded / inp.refuelRate;
+        fuel += fuelAdded;
+      }
+
+      events.push({ kind: 'tirechange', fuelAdded, stopTime });
+      time += stopTime;
+    }
   }
 
-  buildStints([], 0, 0, 0);
+  return { events, time, tirePits, fuelPits, lapsDone };
+}
 
-  return results
-    .filter(r => r.laps > 0)
+// ═══════════════════════════════════════════════════
+//  ORCHESTRATOR
+// ═══════════════════════════════════════════════════
+
+function getMaxStints(inp) {
+  if (!inp.tires.length) return 4;
+  const maxLife    = Math.max(...inp.tires.map(t => t.life));
+  const targetLaps = inp.raceMode === "laps"
+    ? inp.raceLaps
+    : Math.ceil((inp.raceLimitSecs / Math.min(...inp.tires.map(t => t.lap))) * 1.1);
+  return Math.min(7, Math.max(4, Math.ceil(targetLaps / maxLife) + 1));
+}
+
+// A valid sequence never returns to a compound it already left.
+// S→M→S is invalid. Matches real racing: compound order is one-directional.
+function isValidSequence(seq) {
+  const usedNames = new Set();
+  let lastName = null;
+  for (const t of seq) {
+    if (t.name !== lastName) {
+      if (usedNames.has(t.name)) return false;
+      usedNames.add(t.name);
+      lastName = t.name;
+    }
+  }
+  return true;
+}
+
+function genSequences(tires, maxStints) {
+  const out = [];
+  function dfs(seq) {
+    if (seq.length > 0 && isValidSequence(seq)) out.push([...seq]);
+    if (seq.length >= maxStints) return;
+    for (const t of tires) {
+      const next = [...seq, t];
+      if (isValidSequence(next)) dfs(next);
+    }
+  }
+  dfs([]);
+  return out;
+}
+
+// After simulation, extract the actual stint sequence from events and
+// equal-distribute laps across consecutive same-compound stints.
+// Uses ACTUAL laps from simulation (not estimated), then re-simulates.
+// Returns the re-simulated result, or the original if rebalancing doesn't help.
+function rebalanceResult(originalResult, inp) {
+  // Extract stint events in order
+  const stintEvents = originalResult.events.filter(e => e.kind === 'stint');
+  if (stintEvents.length < 2) return originalResult;
+
+  // Build a plan from actual stint events (merge segments from same planned stint back together?
+  // No — each stint event IS one planned stint segment; fuel stops already split them.
+  // We only rebalance runs where NO fuel stop interrupts them (clean same-compound stints).
+  // Strategy: group consecutive same-compound stints that have no fuelstop between them.
+  const newStints = stintEvents.map(e => ({ tire: e.tire, laps: e.laps }));
+
+  // Find runs of consecutive same-compound stints in the event stream
+  // (ignoring fuelstop events which happen INSIDE a stint, not between them)
+  let changed = false;
+  let i = 0;
+  while (i < newStints.length) {
+    let j = i;
+    while (j < newStints.length && newStints[j].tire.name === newStints[i].tire.name) j++;
+    const runLen = j - i;
+    if (runLen > 1) {
+      const totalLaps = newStints.slice(i, j).reduce((s, x) => s + x.laps, 0);
+      const life      = newStints[i].tire.life;
+      const base      = Math.floor(totalLaps / runLen);
+      const rem       = totalLaps % runLen;
+      const newLaps   = Array.from({length: runLen}, (_, k) => Math.min(life, k < rem ? base + 1 : base));
+      const same      = newLaps.every((l, k) => l === newStints[i + k].laps);
+      if (!same) {
+        for (let k = i; k < j; k++) newStints[k].laps = newLaps[k - i];
+        changed = true;
+      }
+    }
+    i = j;
+  }
+
+  if (!changed) return originalResult;
+
+  // Re-simulate with the rebalanced plan
+  const rebalResult = simulate(newStints, inp);
+  if (!rebalResult || rebalResult.lapsDone < 1) return originalResult;
+  return isBetter(rebalResult, originalResult, inp) || rebalResult.lapsDone === originalResult.lapsDone
+    ? rebalResult
+    : originalResult;
+}
+
+function calculateStrategies(inp) {
+  const maxStints = getMaxStints(inp);
+  const seqs      = genSequences(inp.tires, maxStints);
+  const byKey     = new Map();
+
+  for (const tireSeq of seqs) {
+    // Cap targetLaps at max capacity (sum of tire lives).
+    // Without this, S×5×4 gets targetLaps=26 > maxCapacity=20 and allocateGreedy returns null.
+    const maxCapacity = tireSeq.reduce((s, t) => s + t.life, 0);
+    let targetLaps;
+    if (inp.raceMode === 'laps') {
+      targetLaps = inp.raceLaps;
+    } else {
+      const n         = tireSeq.length;
+      const pitBudget = (n - 1) * inp.pitTime;
+      const minLap    = Math.min(...tireSeq.map(t => t.lap));
+      targetLaps      = Math.min(maxCapacity, Math.ceil((inp.raceLimitSecs - pitBudget) / minLap) + n + 2);
+    }
+
+    // Try all allocators; keep best simulation per compound sequence
+    const allocs = [
+      allocateGreedy(tireSeq, targetLaps),
+      allocateLastFull(tireSeq, targetLaps),
+      allocateFuelAligned(tireSeq, targetLaps, inp), // null in TIME mode
+    ].filter(Boolean);
+
+    const seen = new Set();
+    for (const alloc of allocs) {
+      const sig = alloc.join(",");
+      if (seen.has(sig)) continue;
+      seen.add(sig);
+
+      const plan   = tireSeq.map((t, i) => ({ tire: t, laps: alloc[i] }));
+      const result = simulate(plan, inp);
+      if (!result || result.lapsDone < 1) continue;
+
+      const key      = tireSeq.map(t => t.name).join("→");
+      const existing = byKey.get(key);
+      if (!existing || isBetter(result, existing, inp)) {
+        byKey.set(key, result);
+      }
+    }
+  }
+
+  // Post-process 1: equal-distribute same-compound consecutive stints using actual laps
+  for (const [key, result] of byKey) {
+    byKey.set(key, rebalanceResult(result, inp));
+  }
+
+  // Post-process 2: remove dominated same-compound multi-stint strategies.
+  // If H→H exists but H also exists and is equal/better, H→H is wasteful — drop it.
+  // A same-compound multi-stint is only valid if tire life forced the split
+  // (i.e. any single stint in it ran to full tire life).
+  for (const [key, result] of byKey) {
+    const stints = result.events.filter(e => e.kind === 'stint');
+    if (stints.length < 2) continue;
+    const allSame = stints.every(s => s.tire.name === stints[0].tire.name);
+    if (!allSame) continue;
+    // All stints are same compound — check if tire life was actually the constraint
+    const life = stints[0].tire.life;
+    const totalLaps = stints.reduce((s, e) => s + e.laps, 0);
+    if (totalLaps > life) continue; // total exceeds one tire life — stop was necessary, keep it
+    // No stint hit tire life — this stop was unnecessary, drop it
+    byKey.delete(key);
+  }
+
+  return [...byKey.values()]
     .sort((a, b) => {
-      if (inputs.raceMode === "time" && a.laps !== b.laps)
-        return b.laps - a.laps;
-      return a.time - b.time;
+      if (inp.raceMode === 'time' && a.lapsDone !== b.lapsDone) return b.lapsDone - a.lapsDone;
+      if (a.time !== b.time) return a.time - b.time;
+      const lastA = a.events.filter(e => e.kind === 'stint').at(-1);
+      const lastB = b.events.filter(e => e.kind === 'stint').at(-1);
+      return (lastA?.tire.lap ?? 0) - (lastB?.tire.lap ?? 0);
     })
     .slice(0, 3);
 }
 
-// ===================================
-// RENDER
-// ===================================
+function isBetter(a, b, inp) {
+  if (inp.raceMode === 'time' && a.lapsDone !== b.lapsDone) return a.lapsDone > b.lapsDone;
+  return a.time < b.time;
+}
 
-function render(strats) {
+// ── Format helpers ────────────────────────────────────
+function fmtTime(s) {
+  const m  = Math.floor(s / 60);
+  const ss = (s % 60).toFixed(1).padStart(4, "0");
+  return m > 0 ? `${m}m ${ss}s` : `${ss}s`;
+}
+
+// ── Render events ─────────────────────────────────────
+//
+//  Format:
+//    Stint after fuel-free tire change: [Soft ×10] › [Hard ×10]
+//    Stint after tire change with fuel: [Soft ×10] › [Hard ×10  fuel +50L]
+//    Unplanned fuel-only stop:          [Soft ×4] › [fuel only +30L] › [Soft ×6]
+//
+function renderEvents(events) {
+  const items = [];
+
+  for (let i = 0; i < events.length; i++) {
+    const ev = events[i];
+
+    if (ev.kind === 'fuelstop') {
+      items.push({
+        html: `<div class="pit-fuel-only">fuel only +${Math.round(ev.fuelAdded)}L</div>`
+      });
+
+    } else if (ev.kind === 'stint') {
+      // Check if immediately preceded by a tirechange with fuel
+      const prev = i > 0 ? events[i - 1] : null;
+      const fuelTag = prev?.kind === 'tirechange' && prev.fuelAdded > 0
+        ? `<span class="stint-fuel"> fuel +${Math.round(prev.fuelAdded)}L</span>`
+        : '';
+
+      const isHard   = ev.tire.color === '#ffffff';
+      const dotStyle = `background:${ev.tire.color};${isHard ? 'border:1px solid rgba(255,255,255,0.4);' : ''}`;
+
+      items.push({
+        html: `<div class="stint-pill">
+          <div class="stint-dot" style="${dotStyle}"></div>
+          ${ev.tire.name} ×${ev.laps}${fuelTag}
+        </div>`
+      });
+    }
+    // tirechange: consumed by next stint pill above
+  }
+
+  return items.map((item, i) => {
+    const arrow = i > 0 ? `<span class="seq-arrow">›</span>` : '';
+    return arrow + item.html;
+  }).join('');
+}
+
+// ── Render results ────────────────────────────────────
+function render(results, inp) {
   resultsBox.innerHTML = "";
 
-  if (!strats.length) {
-    resultsBox.innerHTML = "<div>No valid strategies</div>";
+  if (!results.length) {
+    resultsBox.innerHTML = `<div class="result-message error">No valid strategies found. Check your tire data.</div>`;
     return;
   }
 
-  strats.forEach((s, i) => {
-    const div = document.createElement("div");
-    div.className = "result-card" + (i === 0 ? " best" : "");
-    div.innerHTML = `
-      <div class="result-title">#${i + 1}</div>
-      <div class="result-meta">
-        Time: ${s.time.toFixed(1)}s • Pits: ${s.pits}
-      </div>
-      <div class="result-strategy">
-        ${s.strategy.map(x => `${x.tire.name} ${x.laps}`).join(" → ")}
-      </div>
+  results.forEach((r, i) => {
+    const card = document.createElement("div");
+    card.className = "result-card" + (i === 0 ? " best" : "");
+
+    const rankLabel = i === 0 ? "Fastest Strategy" : `Strategy ${i + 1}`;
+    const parts     = [];
+    if (r.tirePits > 0) parts.push(`${r.tirePits} tire stop${r.tirePits > 1 ? "s" : ""}`);
+    if (r.fuelPits  > 0) parts.push(`${r.fuelPits} fuel stop${r.fuelPits > 1 ? "s" : ""}`);
+    const stopsLabel = (r.tirePits + r.fuelPits) === 0 ? "No pit stops" : parts.join(" · ");
+    const lapsLabel  = inp.raceMode === "time" ? ` · ${r.lapsDone} laps` : "";
+
+    card.innerHTML = `
+      <div class="result-rank">${rankLabel}</div>
+      <div class="result-time">${fmtTime(r.time)}</div>
+      <div class="result-meta">${stopsLabel}${lapsLabel}</div>
+      <div class="result-sequence">${renderEvents(r.events)}</div>
     `;
-    resultsBox.appendChild(div);
+
+    resultsBox.appendChild(card);
   });
 }
 
-// ===================================
-// CALCULATE
-// ===================================
+// ── Calculate ─────────────────────────────────────────
+calcBtn.addEventListener("click", () => {
+  document.querySelectorAll(".strategy-panel input").forEach(inp => validate(inp));
 
-calcBtn.onclick = () => {
-  console.log("CALCULATE CLICKED");
-  resultsBox.innerHTML = "";
-
-  if (hasErrors()) {
-    resultsBox.innerHTML = "<div>Fix errors before calculating</div>";
+  if (document.querySelectorAll(".field.has-error").length > 0) {
+    resultsBox.innerHTML = `<div class="result-message error">Fix the errors above before calculating.</div>`;
     return;
   }
 
-  const inputs = getInputs();
-  if (!inputs.raceValue || !inputs.tires.length) {
-    resultsBox.innerHTML = "<div>Enter race length and at least one tire</div>";
+  const inp = getInputs();
+
+  if (!inp.raceLaps && !inp.raceLimitSecs) {
+    resultsBox.innerHTML = `<div class="result-message error">Enter a race length.</div>`;
+    return;
+  }
+  if (!inp.tires.length) {
+    resultsBox.innerHTML = `<div class="result-message error">Enter data for at least one tire compound.</div>`;
     return;
   }
 
-const results = calculateStrategies(inputs);
-render(results);
-};
+  calcBtn.textContent = "Calculating…";
+  calcBtn.disabled    = true;
+  resultsBox.innerHTML = `<div class="result-message">Calculating…</div>`;
 
-// ===================================
-// CLEAR
-// ===================================
+  setTimeout(() => {
+    try {
+      render(calculateStrategies(inp), inp);
+    } catch (e) {
+      console.error(e);
+      resultsBox.innerHTML = `<div class="result-message error">Something went wrong.</div>`;
+    } finally {
+      calcBtn.textContent = "Calculate";
+      calcBtn.disabled    = false;
+    }
+  }, 20);
+});
 
-clearBtn.onclick = () => {
+// ── Clear ─────────────────────────────────────────────
+clearBtn.addEventListener("click", () => {
   document.querySelectorAll(".strategy-panel input").forEach(i => i.value = "");
   document.querySelectorAll(".field").forEach(f => f.classList.remove("has-error"));
   document.querySelectorAll(".error-msg").forEach(e => e.textContent = "");
-  resultsBox.innerHTML = "";
+  resultsBox.innerHTML = `<div class="results-placeholder"><div class="placeholder-label">Results appear here</div></div>`;
   raceMode = "laps";
-  raceLength.placeholder = "Total Laps";
+  raceLengthInput.placeholder = "Total laps";
   raceButtons.forEach(b => b.classList.remove("active"));
   raceButtons[0].classList.add("active");
-};
+});
