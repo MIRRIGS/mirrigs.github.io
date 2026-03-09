@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MIR RIGS – Race Strategy</title>
+  <title>Race Strategy – MIR RIGS</title>
 
   <link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
@@ -34,7 +34,7 @@
   <div id="rightBlock">
     <div id="logoDropdownWrap">
       <button id="logoDropdownBtn" aria-haspopup="true" aria-expanded="false">
-        MIR RIGS ▾
+        ☰ Menu
       </button>
       <div id="logoDropdown" class="dropdown-menu" role="menu">
         <a href="/" class="dropdown-item">3D Viewer</a>
@@ -60,6 +60,12 @@
 <!-- ===== MAIN ===== -->
 <div class="page-scroll"><div class="strategy-shell">
 
+  <!-- NEW: Page header -->
+  <div class="calc-header">
+    <div class="calc-title">GT7 Strategy Calculator</div>
+    <div class="calc-subtitle">Calculate the fastest race strategy for Gran Turismo 7 using tire stints, fuel usage, and pit stop timings.</div>
+  </div>
+
   <!-- INPUT PANEL -->
   <div class="strategy-panel">
 
@@ -68,7 +74,7 @@
     <div class="field">
       <label>Race Length <span class="error-msg"></span></label>
       <div class="race-length-row">
-        <input type="number" id="raceLength" placeholder="Enter value" />
+        <input type="number" id="raceLength" placeholder="enter value" />
         <div class="race-toggle">
           <button type="button" class="race-btn active" data-mode="laps">LAPS</button>
           <button type="button" class="race-btn" data-mode="time">TIME</button>
@@ -77,7 +83,7 @@
     </div>
 
     <div class="field">
-      <label>Pit Stop Time Loss — seconds, including tire change <span class="error-msg"></span></label>
+      <label>Pit Stop Time Loss - including tire change <span class="error-msg"></span></label>
       <input type="number" id="pitTime" placeholder="e.g. 25" />
     </div>
 
@@ -87,7 +93,7 @@
 
     <div class="fields-row">
       <div class="field">
-        <label>Fuel Per Lap <span class="error-msg"></span></label>
+        <label>Fuel Used Per Lap <span class="error-msg"></span></label>
         <input type="number" id="fuelPerLap" step="0.1" placeholder="litres per lap" />
       </div>
       <div class="field">
@@ -147,7 +153,13 @@
     </div>
   </div>
 
+  <!-- NEW: SEO text — hidden on desktop, shown at bottom on mobile -->
+  <div class="results-description">Calculate the fastest race strategy for Gran Turismo 7 using tire stints, fuel usage, and pit stop timings.</div>
+
 </div></div>
+
+<!-- NEW: MIR RIGS watermark -->
+<div id="strategyBrand">MIR RIGS</div>
 
 <script>
   const dropBtn = document.getElementById("logoDropdownBtn");

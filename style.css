@@ -417,7 +417,41 @@ hr {
   margin-top: 12px;
   font-size: 0.82rem;
   color: rgba(255,255,255,0.4);
-  line-height: 1.6;
+  line-height: 1.8;
+  text-align: center;
+}
+
+/* ── Overlay stacked contact rows ── */
+.overlay-contacts {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.overlay-contact-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.overlay-contact-label {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.4);
+  font-weight: 500;
+}
+
+/* ── Overlay contact links ── */
+.overlay-link {
+  color: #1677ff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.overlay-link:hover {
+  text-decoration: underline;
 }
 
 /* ================== TOOLTIP ================== */
@@ -489,6 +523,23 @@ hr {
   100% { transform: rotate(360deg); opacity: 0.4; }
 }
 
+/* ================== VIEWER BRAND WATERMARK ================== */
+#viewerBrand {
+  position: fixed;
+  top: calc(var(--topbar-height) + 12px);
+  right: 16px;
+
+  color: rgba(255,255,255,0.22);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+
+  pointer-events: none;
+  user-select: none;
+  z-index: 5;
+}
+
 /* ================== SPEC VISIBILITY ================== */
 .gt-only   { display: block; }
 .kart-only { display: none;  }
@@ -533,7 +584,7 @@ body.kart-spec .kart-only { display: block; }
     height: 20px;
   }
 
-  #orbitHint { display: none; }
+  /* orbitHint is intentionally NOT hidden here — shown in 3D area */
 
   #ui {
     position: fixed;
@@ -613,11 +664,13 @@ body.kart-spec .kart-only { display: block; }
 
   #tooltip {
     min-width: 180px;
-    max-width: calc(100vw - 24px);
+    max-width: calc(100vw - 16px);
+    text-align: center;
   }
 
   #tooltip.spec-tooltip {
-    max-width: calc(100vw - 24px);
+    max-width: calc(100vw - 16px);
+    text-align: center;
   }
 
   .dropdown-menu {

@@ -128,7 +128,15 @@ document.body.appendChild(renderer.domElement);
 applyLayout();
 
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableZoom = false; // disabled on touch; fine on desktop too
+controls.enableZoom = true;
+controls.zoomSpeed = 3;
+controls.minDistance = 73;
+controls.maxDistance = 158;
+
+// Trackpad pinch fires as wheel+ctrlKey with tiny deltas — boost speed for pinch only
+renderer.domElement.addEventListener('wheel', (e) => {
+  controls.zoomSpeed = e.ctrlKey ? 24 : 3;
+}, { passive: true, capture: true });
 controls.enableDamping = true;
 controls.enablePan = false;
 controls.minPolarAngle = Math.PI / 4.8;
@@ -515,21 +523,14 @@ let isTouchDevice = false;
 window.addEventListener("touchstart", () => { isTouchDevice = true; }, { once: true });
 
 function positionTooltipFromButton(btn) {
-  // In portrait, show tooltip above the button instead of to the right
+  // In portrait, center the tooltip horizontally in the 3D area gap
   if (isPortrait()) {
-    const btnRect = btn.getBoundingClientRect();
-    tooltip.style.left = `${Math.max(8, btnRect.left)}px`;
-    tooltip.style.top = `${btnRect.top - tooltip.offsetHeight - 10}px`;
-
-    const padding = 8;
-    const maxLeft = window.innerWidth - tooltip.offsetWidth - padding;
-    const currentLeft = parseFloat(tooltip.style.left);
-    tooltip.style.left = `${Math.max(padding, Math.min(maxLeft, currentLeft))}px`;
-
-    const currentTop = parseFloat(tooltip.style.top);
-    if (currentTop < TOPBAR_H + padding) {
-      tooltip.style.top = `${btnRect.bottom + 10}px`;
-    }
+    const uiTop = TOPBAR_H + getPortrait3DHeight();
+    const pad = 8;
+    const tHeight = tooltip.offsetHeight || 60;
+    const tWidth = tooltip.offsetWidth || 200;
+    tooltip.style.top = `${uiTop - tHeight - pad}px`;
+    tooltip.style.left = `${Math.max(pad, (window.innerWidth - tWidth) / 2)}px`;
     return;
   }
 

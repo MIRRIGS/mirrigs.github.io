@@ -238,8 +238,50 @@ body, html {
   gap: 24px;
   max-width: 1000px;
   margin: 0 auto;
-  padding: 68px 24px 48px;
+  padding: 20px 24px 48px;   /* was 68px — reduced top gap */
   align-items: start;
+}
+
+/* ── NEW: page header spans full width ── */
+.calc-header {
+  grid-column: 1 / -1;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  margin-bottom: 4px;
+}
+
+.calc-title {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+  margin-bottom: 5px;
+}
+
+.calc-subtitle {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.2);
+  line-height: 1.4;
+}
+
+/* ── NEW: SEO text below results — desktop hidden, mobile shown ── */
+.results-description {
+  display: none;
+}
+
+/* ── NEW: MIR RIGS watermark ── */
+#strategyBrand {
+  position: fixed;
+  top: calc(48px + 12px);
+  right: 20px;
+  color: rgba(255,255,255,0.22);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  pointer-events: none;
+  user-select: none;
+  z-index: 5;
 }
 
 /* =========================================================
@@ -575,10 +617,24 @@ input[type="number"]:focus {
   #socials a { width: 20px; height: 20px; }
   .spec-btn { min-width: 56px; padding: 0 12px; font-size: 11px; height: 28px; }
 
+  /* Prevent iOS zoom on input focus */
+  input[type="number"] { font-size: 16px; }
+
   .strategy-shell {
     grid-template-columns: 1fr;
-    padding: 64px 16px 48px;
+    padding: 16px 16px 48px;   /* was 64px — reduced top gap */
     gap: 16px;
+  }
+
+  /* Hide subtitle on mobile — show SEO text at bottom instead */
+  .calc-subtitle { display: none; }
+
+  .results-description {
+    display: block;
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.2);
+    line-height: 1.6;
+    padding: 0 2px 8px;
   }
 
   .strategy-panel {
