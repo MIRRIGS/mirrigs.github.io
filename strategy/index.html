@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Race Strategy – MIR RIGS</title>
+  <title>GT7 Strategy Calculator – MIR RIGS</title>
 
   <link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
@@ -12,6 +12,15 @@
   <meta property="og:title" content="MIR RIGS – Race Strategy">
   <meta property="og:description" content="GT7 race strategy calculator. Find the fastest pit stop strategy for your race.">
   <meta property="og:image" content="https://mirrigs.github.io/assets/MIRLOGO.png">
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-96KFL8ZZE2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-96KFL8ZZE2');
+  </script>
 
   <link rel="stylesheet" href="strategy.css" />
 </head>
@@ -23,7 +32,7 @@
   <div id="specSwitch">
     <button class="spec-btn active">GT7</button>
     <div class="beta-wrap" id="betaWrap">
-      <span class="beta-badge" id="betaBadge">BETA</span>
+      <span class="beta-badge" id="betaBadge">Report Bugs Here</span>
       <div class="beta-tooltip" id="betaTooltip">
         <div class="beta-tooltip-title">Work in progress</div>
         <p class="beta-tooltip-body">Found a bug? Share a screenshot on Instagram and tag us — we'll fix it fast.</p>
@@ -60,7 +69,7 @@
 <!-- ===== MAIN ===== -->
 <div class="page-scroll"><div class="strategy-shell">
 
-  <!-- NEW: Page header -->
+  <!-- Page header -->
   <div class="calc-header">
     <div class="calc-title">GT7 Strategy Calculator</div>
     <div class="calc-subtitle">Calculate the fastest race strategy for Gran Turismo 7 using tire stints, fuel usage, and pit stop timings.</div>
@@ -153,12 +162,12 @@
     </div>
   </div>
 
-  <!-- NEW: SEO text — hidden on desktop, shown at bottom on mobile -->
+  <!-- SEO text — hidden on desktop, shown at bottom on mobile -->
   <div class="results-description">Calculate the fastest race strategy for Gran Turismo 7 using tire stints, fuel usage, and pit stop timings.</div>
 
 </div></div>
 
-<!-- NEW: MIR RIGS watermark -->
+<!-- MIR RIGS watermark -->
 <div id="strategyBrand">MIR RIGS</div>
 
 <script>
@@ -174,7 +183,7 @@
     dropBtn.setAttribute("aria-expanded", false);
   });
 
-  // Beta tooltip — stays open when hovering the tooltip itself so the link is clickable
+  // Beta tooltip
   const betaWrap    = document.getElementById("betaWrap");
   const betaTooltip = document.getElementById("betaTooltip");
   let betaTimeout;
@@ -184,6 +193,11 @@
   betaWrap.addEventListener("mouseleave", hideBeta);
   betaTooltip.addEventListener("mouseenter", showBeta);
   betaTooltip.addEventListener("mouseleave", hideBeta);
+
+  // Analytics — calculate button
+  document.getElementById("calcBtn").addEventListener("click", () => {
+    gtag('event', 'calculate_clicked');
+  });
 </script>
 
 <script src="strategy.js"></script>

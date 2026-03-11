@@ -28,6 +28,15 @@
   }
   </script>
 
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-96KFL8ZZE2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-96KFL8ZZE2');
+  </script>
+
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -233,6 +242,18 @@
   document.addEventListener("click", () => {
     dropMenu.classList.remove("show");
     dropBtn.setAttribute("aria-expanded", false);
+  });
+
+  // Analytics — spec switch tracking
+  document.querySelectorAll("#specSwitch .spec-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      gtag('event', 'spec_switched', { spec: btn.textContent.trim() });
+    });
+  });
+
+  // Analytics — finalize button
+  document.getElementById("finalizeBtn").addEventListener("click", () => {
+    gtag('event', 'finalize_clicked');
   });
 </script>
 
