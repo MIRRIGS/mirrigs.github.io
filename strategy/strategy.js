@@ -389,12 +389,27 @@ function genSequences(tires, maxStints) {
 }
 
 // ── Rules filter ──────────────────────────────────────
+// Check planned sequence (fast pre-filter before simulation)
 function passesRules(tireSeq, inp) {
   const names = new Set(tireSeq.map(t => t.name));
   for (const mand of inp.mandatoryTires) {
     if (!names.has(mand)) return false;
   }
   if (names.size < inp.minCompounds) return false;
+  return true;
+}
+
+// Check actual simulation result — critical for TIME mode where race
+// can end before all planned stints are reached.
+function resultPassesRules(result, inp) {
+  if (!inp.mandatoryTires.length && inp.minCompounds <= 1) return true;
+  const actualNames = new Set(
+    result.events.filter(e => e.kind === 'stint').map(e => e.tire.name)
+  );
+  for (const mand of inp.mandatoryTires) {
+    if (!actualNames.has(mand)) return false;
+  }
+  if (actualNames.size < inp.minCompounds) return false;
   return true;
 }
 
@@ -465,6 +480,9 @@ function calculateStrategies(inp) {
       const plan   = tireSeq.map((t, i) => ({ tire: t, laps: alloc[i] }));
       const result = simulate(plan, inp);
       if (!result || result.lapsDone < 1) continue;
+      // In TIME mode the race may end before all planned stints are reached,
+      // so re-check rules against actual compounds used, not just the plan.
+      if (inp.raceMode === 'time' && !resultPassesRules(result, inp)) continue;
       const key      = tireSeq.map(t => t.name).join("→");
       const existing = byKey.get(key);
       if (!existing || isBetter(result, existing, inp)) {
@@ -474,7 +492,13 @@ function calculateStrategies(inp) {
   }
 
   for (const [key, result] of byKey) {
-    byKey.set(key, rebalanceResult(result, inp));
+    const rebalanced = rebalanceResult(result, inp);
+    // Rebalance re-simulates; in TIME mode verify rules still hold on actual result
+    if (inp.raceMode === 'time' && !resultPassesRules(rebalanced, inp)) {
+      byKey.delete(key);
+    } else {
+      byKey.set(key, rebalanced);
+    }
   }
 
   for (const [key, result] of byKey) {
