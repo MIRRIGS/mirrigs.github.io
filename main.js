@@ -85,12 +85,10 @@ function isPortrait() {
   return window.innerHeight > window.innerWidth;
 }
 
-// Height of the 3D canvas in portrait mode (below topbar, above UI panel)
 function getPortrait3DHeight() {
   return Math.round(window.innerHeight * 0.55) - TOPBAR_H;
 }
 
-// Called on load and every resize — sizes renderer and updates CSS variable
 function applyLayout() {
   if (isPortrait()) {
     const w = window.innerWidth;
@@ -99,7 +97,6 @@ function applyLayout() {
     renderer.setScissorTest(false);
     renderer.setViewport(0, 0, w, h);
     camera.aspect = w / h;
-    // Tell CSS where the UI panel should start
     document.documentElement.style.setProperty("--portrait-3d-h", h + "px");
   } else {
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -124,7 +121,6 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
-// Apply initial layout before anything else renders
 applyLayout();
 
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -133,7 +129,6 @@ controls.zoomSpeed = 3;
 controls.minDistance = 73;
 controls.maxDistance = 158;
 
-// Trackpad pinch fires as wheel+ctrlKey with tiny deltas — boost speed for pinch only
 renderer.domElement.addEventListener('wheel', (e) => {
   controls.zoomSpeed = e.ctrlKey ? 24 : 3;
 }, { passive: true, capture: true });
@@ -149,10 +144,8 @@ function updateSceneCenter() {
   });
   controls.target.set(0, 20, 0);
   if (!isPortrait()) {
-    // Landscape: shift camera right to account for left side panel
     camera.position.x = ((UI_WIDTH + UI_MARGIN) - window.innerWidth / 2) * 0.15 + 90;
   } else {
-    // Portrait: center the camera
     camera.position.x = 90;
   }
 }
@@ -355,7 +348,6 @@ window.selectWheels = (file, btn) => {
   if (currentSpec === "kart") {
     killVerticalSupports();
 
-    // Wheels and legs are mutually exclusive
     const legs = "KART_Legs.glb";
     if (selected.addons.has(legs)) {
       selected.addons.delete(legs);
@@ -375,10 +367,8 @@ window.toggleAddon = (file, btn) => {
   if (resolvedFile === "KART_Verticle.glb" && verticalSupportsBlocked()) return;
 
   if (resolvedFile === "KART_Legs.glb") {
-    // Legs kill vertical supports
     killVerticalSupports();
 
-    // Legs and wheels are mutually exclusive — only block when turning legs ON
     if (!selected.addons.has(resolvedFile)) {
       if (selected.wheels) {
         if (models[selected.wheels]) models[selected.wheels].visible = false;
@@ -470,8 +460,6 @@ window.switchSpec = (spec, btn) => {
 
 /* ================== RENDER LOOP ================== */
 function updateCameraOffset() {
-  // In portrait mode the canvas is already sized to only cover the 3D area,
-  // so no scissor tricks needed — just render normally.
   if (isPortrait()) {
     renderer.setScissorTest(false);
     renderer.setViewport(0, 0, window.innerWidth, getPortrait3DHeight());
@@ -480,7 +468,6 @@ function updateCameraOffset() {
     return;
   }
 
-  // Landscape: scissor to the right of the side panel
   const ui = document.getElementById("ui");
   if (!ui) return;
   const uiRect = ui.getBoundingClientRect();
@@ -523,7 +510,6 @@ let isTouchDevice = false;
 window.addEventListener("touchstart", () => { isTouchDevice = true; }, { once: true });
 
 function positionTooltipFromButton(btn) {
-  // In portrait, center the tooltip horizontally in the 3D area gap
   if (isPortrait()) {
     const uiTop = TOPBAR_H + getPortrait3DHeight();
     const pad = 8;
@@ -534,7 +520,6 @@ function positionTooltipFromButton(btn) {
     return;
   }
 
-  // Landscape: show to the right of the UI panel
   const rect = document.getElementById("ui").getBoundingClientRect();
   const btnRect = btn.getBoundingClientRect();
   tooltip.style.left = `${rect.right + 12}px`;
@@ -641,3 +626,125 @@ document.querySelector(".close-overlay").addEventListener("click", () => {
 overlay.addEventListener("click", e => {
   if (e.target === overlay) overlay.classList.remove("show");
 });
+
+/* ================== DIMENSION BUBBLE ================== */
+{
+  let _dimSpec   = 'gt';
+  let _dimScreen = null; // null | 'single' | 'triple'
+
+  function getDims() {
+    const isKart = _dimSpec === 'kart';
+    const heightBase       = isKart ? "1'5\""  : "2'1\"";
+    const heightWithScreen = isKart ? "3'8\""  : "4'4\"";
+    const height = _dimScreen ? heightWithScreen : heightBase;
+    const width  = _dimScreen === 'triple' ? "4'5\""
+                 : _dimScreen === 'single' ? "2'2\""
+                 : "1'11\"";
+    return { height, width, length: "4'7\"" };
+  }
+
+  const dimBubble = document.createElement('div');
+  dimBubble.id = 'dimBubble';
+  dimBubble.style.cssText = [
+    'position:fixed',
+    'right:72px',
+    'top:50%',
+    'transform:translateY(-50%)',
+    'background:rgba(0,0,0,0.55)',
+    'border:1.5px solid #1677ff',
+    'border-radius:12px',
+    'padding:12px 16px',
+    'color:#fff',
+    'font-family:system-ui,sans-serif',
+    'font-size:13px',
+    'font-weight:500',
+    'line-height:2',
+    'white-space:nowrap',
+    'pointer-events:none',
+    'z-index:10',
+    'display:none',
+    'backdrop-filter:blur(8px)',
+    '-webkit-backdrop-filter:blur(8px)',
+    'box-shadow:0 4px 24px rgba(22,119,255,0.15)',
+  ].join(';');
+  document.body.appendChild(dimBubble);
+
+  function renderBubble() {
+    const { height, width, length } = getDims();
+    dimBubble.innerHTML =
+      `<span style="color:rgba(255,255,255,0.4);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700">Dimensions</span><br>` +
+      `<span style="color:rgba(255,255,255,0.5)">Length</span><span style="color:#fff;font-weight:700;margin-left:8px">${length}</span><br>` +
+      `<span style="color:rgba(255,255,255,0.5)">Width &nbsp;</span><span style="color:#fff;font-weight:700;margin-left:8px">${width}</span><br>` +
+      `<span style="color:rgba(255,255,255,0.5)">Height</span><span style="color:#fff;font-weight:700;margin-left:8px">${height}</span>`;
+  }
+
+  const dimBtn = document.createElement('button');
+  dimBtn.id = 'rulerBtn';
+  dimBtn.title = 'Toggle dimensions';
+  dimBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="10" rx="1.5"/><line x1="6" y1="11" x2="6" y2="14"/><line x1="9" y1="12" x2="9" y2="14"/><line x1="12" y1="11" x2="12" y2="14"/><line x1="15" y1="12" x2="15" y2="14"/><line x1="18" y1="11" x2="18" y2="14"/></svg>`;
+  dimBtn.style.cssText = [
+    'position:fixed',
+    'right:20px',
+    'top:50%',
+    'transform:translateY(-50%)',
+    'width:44px',
+    'height:44px',
+    'border-radius:50%',
+    'background:rgba(20,20,20,0.85)',
+    'border:1.5px solid rgba(255,255,255,0.18)',
+    'color:rgba(255,255,255,0.6)',
+    'cursor:pointer',
+    'display:flex',
+    'align-items:center',
+    'justify-content:center',
+    'z-index:10',
+    'backdrop-filter:blur(6px)',
+    '-webkit-backdrop-filter:blur(6px)',
+    'transition:border-color 0.2s,color 0.2s,background 0.2s',
+  ].join(';');
+  document.body.appendChild(dimBtn);
+
+  const dimStyle = document.createElement('style');
+  dimStyle.textContent = `
+    #rulerBtn:hover  { border-color:rgba(255,255,255,0.45)!important; color:#fff!important; }
+    #rulerBtn.active { border-color:#1677ff!important; color:#1677ff!important; background:rgba(22,119,255,0.12)!important; }
+    @media (orientation: portrait) {
+      #rulerBtn {
+        top: calc(48px + (55vh - 48px) * 0.25) !important;
+        right: 12px !important;
+        transform: none !important;
+      }
+      #dimBubble {
+        top: calc(48px + (55vh - 48px) * 0.25) !important;
+        right: 64px !important;
+        transform: none !important;
+      }
+    }
+  `;
+  document.head.appendChild(dimStyle);
+
+  dimBtn.addEventListener('click', () => {
+    const show = dimBubble.style.display === 'none';
+    dimBubble.style.display = show ? '' : 'none';
+    dimBtn.classList.toggle('active', show);
+    if (show) renderBubble();
+  });
+
+  const _origSelectScreen = window.selectScreen;
+  window.selectScreen = function(file, btn) {
+    _origSelectScreen(file, btn);
+    const isNowActive = btn.classList.contains('active');
+    _dimScreen = isNowActive
+      ? (file.includes('Triple') ? 'triple' : 'single')
+      : null;
+    if (dimBubble.style.display !== 'none') renderBubble();
+  };
+
+  const _origSwitchSpec = window.switchSpec;
+  window.switchSpec = function(spec, btn) {
+    _origSwitchSpec(spec, btn);
+    _dimSpec   = spec;
+    _dimScreen = null;
+    if (dimBubble.style.display !== 'none') renderBubble();
+  };
+}

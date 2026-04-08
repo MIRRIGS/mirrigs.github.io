@@ -12,8 +12,6 @@ body, html {
   overflow: hidden;
 }
 
-
-/* ── Page scroll container — keeps scrollbar below topbar ── */
 .page-scroll {
   position: fixed;
   top: 48px;
@@ -70,7 +68,6 @@ body, html {
   border-color: #fff;
 }
 
-/* ── Beta badge ── */
 .beta-wrap {
   position: relative;
   display: flex;
@@ -143,9 +140,7 @@ body, html {
   transition: background 0.15s ease;
 }
 
-.beta-tooltip-link:hover {
-  background: rgba(241,12,69,0.1);
-}
+.beta-tooltip-link:hover { background: rgba(241,12,69,0.1); }
 
 #rightBlock {
   display: flex;
@@ -238,11 +233,10 @@ body, html {
   gap: 24px;
   max-width: 1000px;
   margin: 0 auto;
-  padding: 20px 24px 48px;   /* was 68px — reduced top gap */
+  padding: 20px 24px 48px;
   align-items: start;
 }
 
-/* ── NEW: page header spans full width ── */
 .calc-header {
   grid-column: 1 / -1;
   padding-bottom: 10px;
@@ -264,12 +258,8 @@ body, html {
   line-height: 1.4;
 }
 
-/* ── NEW: SEO text below results — desktop hidden, mobile shown ── */
-.results-description {
-  display: none;
-}
+.results-description { display: none; }
 
-/* ── NEW: MIR RIGS watermark ── */
 #strategyBrand {
   position: fixed;
   top: calc(48px + 12px);
@@ -305,6 +295,15 @@ body, html {
   text-transform: uppercase;
   color: rgba(255,255,255,0.35);
   margin-bottom: 14px;
+}
+
+.section-optional {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.18);
+  text-transform: none;
+  margin-left: 6px;
 }
 
 .panel-divider {
@@ -418,7 +417,6 @@ input[type="number"]:focus {
 
 .tire-row input { text-align: center; }
 
-/* Tire dots in input panel — racing colors */
 .tire-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
@@ -536,7 +534,6 @@ input[type="number"]:focus {
   margin-bottom: 14px;
 }
 
-/* ── Strategy sequence ── */
 .result-sequence {
   display: flex;
   flex-wrap: wrap;
@@ -544,7 +541,6 @@ input[type="number"]:focus {
   gap: 5px;
 }
 
-/* Tire stint pill */
 .stint-pill {
   display: flex;
   align-items: center;
@@ -558,14 +554,12 @@ input[type="number"]:focus {
   color: rgba(255,255,255,0.7);
 }
 
-/* Dot inside stint pill — sized down from input dots */
 .stint-dot {
   width: 7px; height: 7px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-/* Arrow between sequence items */
 .seq-arrow {
   font-size: 0.85rem;
   color: rgba(255,255,255,0.2);
@@ -574,7 +568,6 @@ input[type="number"]:focus {
   align-self: center;
 }
 
-/* Fuel % shown inside a stint pill after tire change */
 .stint-fuel {
   color: #fea700;
   font-weight: 700;
@@ -582,7 +575,6 @@ input[type="number"]:focus {
   margin-left: 2px;
 }
 
-/* Unplanned fuel-only stop pill */
 .pit-fuel-only {
   font-size: 0.7rem;
   font-weight: 700;
@@ -609,6 +601,140 @@ input[type="number"]:focus {
 }
 
 /* =========================================================
+   RULES — Mandatory tire buttons + Compounds Required slider
+   ========================================================= */
+
+/* ── Mandatory tire toggle buttons ── */
+.mand-btn-row {
+  display: flex;
+  gap: 6px;
+}
+
+.mand-btn {
+  flex: 1;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: #2a2a2a;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.4);
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: system-ui, sans-serif;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease,
+              color 0.15s ease;
+  white-space: nowrap;
+}
+
+.mand-btn:hover:not(.active):not(:disabled) {
+  border-color: rgba(254,167,0,0.35);
+  color: rgba(255,255,255,0.65);
+}
+
+.mand-btn.active {
+  background: rgba(254,167,0,0.12);
+  border-color: #fea700;
+  color: #fea700;
+  font-weight: 800;
+}
+
+/* Tire color dots inside mand buttons */
+.mand-btn-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.mand-btn-dot.soft   { background: #ff3333; }
+.mand-btn-dot.medium { background: #f5c400; }
+.mand-btn-dot.hard   { background: #fff; border: 1px solid rgba(255,255,255,0.4); }
+
+/* ── Compounds Required slider ── */
+.creq-slider {
+  position: relative;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #2a2a2a;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 0 19px;
+  cursor: pointer;
+  touch-action: none;
+  overflow: hidden;
+}
+
+.creq-track-bg,
+.creq-track-fill {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.creq-track-bg {
+  left: 32px;
+  right: 32px;
+  background: rgba(255,255,255,0.1);
+}
+
+.creq-track-fill {
+  left: 32px;
+  background: #fea700;
+  width: 0%;
+  transition: width 0.2s ease;
+}
+
+.creq-node {
+  position: relative;
+  z-index: 1;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #383838;
+  border: 2px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.3);
+  font-size: 0.75rem;
+  font-weight: 800;
+  font-family: system-ui, sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.18s ease, background 0.18s ease,
+              color 0.18s ease, transform 0.15s ease;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.creq-node:hover:not(.active):not(.locked) {
+  border-color: rgba(254,167,0,0.5);
+  color: rgba(255,255,255,0.7);
+}
+
+.creq-node.active {
+  background: #fea700;
+  border-color: #fea700;
+  color: #000;
+}
+
+/* Locked = forced by mandatory tires, can't click lower */
+.creq-node.locked {
+  background: #2a2a2a;
+  border-color: rgba(254,167,0,0.2);
+  color: rgba(254,167,0,0.3);
+  cursor: not-allowed;
+}
+
+/* =========================================================
    MOBILE
    ========================================================= */
 
@@ -617,16 +743,14 @@ input[type="number"]:focus {
   #socials a { width: 20px; height: 20px; }
   .spec-btn { min-width: 56px; padding: 0 12px; font-size: 11px; height: 28px; }
 
-  /* Prevent iOS zoom on input focus */
   input[type="number"] { font-size: 16px; }
 
   .strategy-shell {
     grid-template-columns: 1fr;
-    padding: 16px 16px 48px;   /* was 64px — reduced top gap */
+    padding: 16px 16px 48px;
     gap: 16px;
   }
 
-  /* Hide subtitle on mobile — show SEO text at bottom instead */
   .calc-subtitle { display: none; }
 
   .results-description {

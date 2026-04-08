@@ -1,5 +1,5 @@
 // =====================================================
-//  MIR RIGS — GT7 Race Strategy Calculator  v7
+//  MIR RIGS — GT7 Race Strategy Calculator  v8
 //
 //  RULES:
 //  - Tank always 100L max. startingFuel ≤ 100.
@@ -12,6 +12,7 @@
 //  - Lap 1 counts toward tire wear like every other lap.
 //  - MAX_STINTS computed dynamically per race.
 //  - Fuel displayed in litres (tank = 100L always).
+//  - Rules: mandatory tires + minimum compound count filter.
 // =====================================================
 
 // ── DOM ──────────────────────────────────────────────
@@ -43,6 +44,101 @@ raceButtons.forEach(btn => {
     clearErr(raceLengthInput);
   });
 });
+
+// ── Mandatory tire toggle buttons ────────────────────
+const mandBtns = document.querySelectorAll(".mand-btn");
+const mandActive = new Set(); // tracks which compounds are toggled on
+
+function getMandatoryCount() { return mandActive.size; }
+
+function onMandChange() {
+  const count = getMandatoryCount();
+  // Clamp minCompounds up to mandatory count, never below
+  const newMin = Math.max(minCompounds, count);
+  updateSlider(newMin);
+  // Lock slider nodes that are below the mandatory floor
+  updateSliderLocks();
+}
+
+mandBtns.forEach(btn => {
+  btn.addEventListener("click", () => {
+    const compound = btn.dataset.compound;
+    if (mandActive.has(compound)) {
+      mandActive.delete(compound);
+      btn.classList.remove("active");
+      btn.setAttribute("aria-pressed", "false");
+    } else {
+      mandActive.add(compound);
+      btn.classList.add("active");
+      btn.setAttribute("aria-pressed", "true");
+    }
+    onMandChange();
+  });
+});
+
+// ── Compounds Required slider ─────────────────────────
+let minCompounds = 1;
+const creqNodes = document.querySelectorAll(".creq-node");
+const creqFill  = document.getElementById("creqFill");
+
+function updateSlider(val) {
+  val = Math.max(1, Math.min(3, val));
+  minCompounds = val;
+  creqNodes.forEach(n => {
+    const nVal = Number(n.dataset.val);
+    n.classList.toggle("active", nVal === val);
+    n.setAttribute("aria-pressed", nVal === val ? "true" : "false");
+  });
+  // Track fill: spans from left node centre to active node centre
+  // Nodes live at positions 0%, 50%, 100% of the inner track space
+  const pct = (val - 1) / 2; // 0, 0.5, 1
+  creqFill.style.width = `calc(${pct * 100}% * (1 - 28px / 100%))`;
+  // Simpler: use fixed pixel-aware calc
+  if (val === 1) creqFill.style.width = '0px';
+  if (val === 2) creqFill.style.width = 'calc(50% - 32px)';
+  if (val === 3) creqFill.style.width = 'calc(100% - 64px)';
+  updateSliderLocks();
+}
+
+function updateSliderLocks() {
+  const floor = getMandatoryCount(); // minimum selectable value
+  creqNodes.forEach(n => {
+    const nVal = Number(n.dataset.val);
+    const isLocked = nVal < floor; // can't go below mandatory count
+    const isActive = nVal === minCompounds;
+    n.classList.toggle("locked", isLocked && !isActive);
+    n.disabled = isLocked && !isActive;
+  });
+}
+
+creqNodes.forEach(node => {
+  node.addEventListener("click", () => {
+    const val = Number(node.dataset.val);
+    if (val < getMandatoryCount()) return; // locked
+    updateSlider(val);
+  });
+});
+
+// Drag support
+(function () {
+  const slider = document.getElementById("creqSlider");
+  let dragging = false;
+
+  function valFromX(clientX) {
+    const rect = slider.getBoundingClientRect();
+    const pct  = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    return Math.round(pct * 2) + 1;
+  }
+
+  slider.addEventListener("mousedown",  e => { dragging = true; const v = valFromX(e.clientX); if (v >= getMandatoryCount()) updateSlider(v); });
+  slider.addEventListener("touchstart", e => { dragging = true; const v = valFromX(e.touches[0].clientX); if (v >= getMandatoryCount()) updateSlider(v); }, { passive: true });
+  document.addEventListener("mousemove",  e => { if (!dragging) return; const v = valFromX(e.clientX); if (v >= getMandatoryCount()) updateSlider(v); });
+  document.addEventListener("touchmove",  e => { if (!dragging) return; const v = valFromX(e.touches[0].clientX); if (v >= getMandatoryCount()) updateSlider(v); }, { passive: true });
+  document.addEventListener("mouseup",  () => { dragging = false; });
+  document.addEventListener("touchend", () => { dragging = false; });
+})();
+
+updateSlider(1);
 
 // ── Validation ────────────────────────────────────────
 function setErr(input, msg) {
@@ -85,7 +181,7 @@ function validate(input) {
   }
 }
 
-document.querySelectorAll(".strategy-panel input").forEach(inp => {
+document.querySelectorAll(".strategy-panel input[type='number']").forEach(inp => {
   inp.addEventListener("input", () => validate(inp));
   inp.addEventListener("blur",  () => validate(inp));
 });
@@ -104,18 +200,16 @@ function getInputs() {
       { name: "Soft",   color: "#ff3333", lap: Number(softLapI.value),  life: Number(softLifeI.value)  },
       { name: "Medium", color: "#f5c400", lap: Number(medLapI.value),   life: Number(medLifeI.value)   },
       { name: "Hard",   color: "#ffffff", lap: Number(hardLapI.value),  life: Number(hardLifeI.value)  }
-    ].filter(t => t.lap > 0 && t.life > 0)
+    ].filter(t => t.lap > 0 && t.life > 0),
+    mandatoryTires: [...mandActive],
+    minCompounds
   };
 }
 
 // ═══════════════════════════════════════════════════
 //  ALLOCATORS
-//  Each returns an array of lap counts per stint,
-//  or null if the plan can't fit within tire lives.
 // ═══════════════════════════════════════════════════
 
-// Greedy: give the most laps to the fastest compound first.
-// Naturally uses fastest tire most, and (by order) puts it last.
 function allocateGreedy(tireSeq, totalLaps) {
   const n = tireSeq.length;
   if (totalLaps < n) return null;
@@ -132,19 +226,14 @@ function allocateGreedy(tireSeq, totalLaps) {
   return laps;
 }
 
-// LastFull: give the LAST stint its full tire life (capped at remaining laps),
-// then distribute the rest greedily across earlier stints.
-// This ensures softs (placed last) are always used completely.
 function allocateLastFull(tireSeq, totalLaps) {
   const n = tireSeq.length;
   if (totalLaps < n) return null;
   const laps = new Array(n).fill(1);
-  // Last stint: as much of its life as fits
   const lastMax  = Math.min(tireSeq[n - 1].life, totalLaps - (n - 1));
   laps[n - 1]    = lastMax;
   let rem        = totalLaps - lastMax;
-  if (rem < n - 1) return null; // can't fill earlier stints with 1 lap each
-  // Fill earlier stints greedily (fastest first)
+  if (rem < n - 1) return null;
   const order = [...Array(n - 1).keys()].sort((a, b) => tireSeq[a].lap - tireSeq[b].lap);
   for (const i of order) {
     const add = Math.min(rem - (n - 2 - i), tireSeq[i].life - 1);
@@ -153,11 +242,6 @@ function allocateLastFull(tireSeq, totalLaps) {
     rem     -= add;
     if (rem <= n - 2 - i) break;
   }
-  if (rem !== n - 1) {
-    // Distribute remainder (1 per earlier stint already accounted for)
-    // This happens when tire lives are limiting — just accept what we have
-  }
-  // Validate
   for (let i = 0; i < n; i++) {
     if (laps[i] < 1 || laps[i] > tireSeq[i].life) return null;
   }
@@ -165,10 +249,8 @@ function allocateLastFull(tireSeq, totalLaps) {
   return laps;
 }
 
-// FuelAligned (LAPS mode only): split stints at fuel-tank boundaries
-// to avoid unplanned mid-stint fuel stops.
 function allocateFuelAligned(tireSeq, totalLaps, inp) {
-  if (inp.raceMode !== 'laps') return null; // not used in TIME mode
+  if (inp.raceMode !== 'laps') return null;
   const n = tireSeq.length;
   if (totalLaps < n) return null;
   if (!inp.fuelPerLap || inp.fuelPerLap <= 0) return null;
@@ -189,12 +271,7 @@ function allocateFuelAligned(tireSeq, totalLaps, inp) {
 // ═══════════════════════════════════════════════════
 //  SIMULATION
 // ═══════════════════════════════════════════════════
-//
-//  Events array (chronological):
-//    { kind:'stint',      tire, laps }
-//    { kind:'fuelstop',   fuelAdded, stopTime }   ← unplanned, mid-stint
-//    { kind:'tirechange', fuelAdded, stopTime }   ← planned, end of stint
-//
+
 function simulate(plan, inp) {
   let time     = 0;
   let fuel     = inp.startingFuel;
@@ -209,7 +286,6 @@ function simulate(plan, inp) {
 
     for (let lap = 0; lap < stintLen; lap++) {
 
-      // ── Unplanned fuel stop ──
       if (inp.fuelPerLap > 0 && fuel < inp.fuelPerLap) {
         if (segLaps > 0) {
           events.push({ kind: 'stint', tire, laps: segLaps });
@@ -227,13 +303,11 @@ function simulate(plan, inp) {
         fuel += fuelAdded;
       }
 
-      // ── Run lap ──
       time += tire.lap;
       fuel  = Math.max(0, fuel - inp.fuelPerLap);
       lapsDone++;
       segLaps++;
 
-      // ── Race end ──
       if (inp.raceMode === 'time' && time >= inp.raceLimitSecs) {
         events.push({ kind: 'stint', tire, laps: segLaps });
         return { events, time, tirePits, fuelPits, lapsDone };
@@ -246,7 +320,6 @@ function simulate(plan, inp) {
 
     if (segLaps > 0) events.push({ kind: 'stint', tire, laps: segLaps });
 
-    // ── Planned tire-change stop ──
     if (si < plan.length - 1) {
       tirePits++;
       const next      = plan[si + 1];
@@ -256,7 +329,6 @@ function simulate(plan, inp) {
       if (inp.fuelPerLap > 0) {
         let lapsToFuelFor = next.laps;
         if (inp.raceMode === 'time') {
-          // Estimate remaining laps from this point to avoid over-fueling
           const timeAfterStop   = time + inp.pitTime;
           const drivingTimeLeft = Math.max(0, inp.raceLimitSecs - timeAfterStop);
           const estLaps         = Math.max(1, Math.ceil(drivingTimeLeft / next.tire.lap));
@@ -289,8 +361,6 @@ function getMaxStints(inp) {
   return Math.min(7, Math.max(4, Math.ceil(targetLaps / maxLife) + 1));
 }
 
-// A valid sequence never returns to a compound it already left.
-// S→M→S is invalid. Matches real racing: compound order is one-directional.
 function isValidSequence(seq) {
   const usedNames = new Set();
   let lastName = null;
@@ -318,23 +388,20 @@ function genSequences(tires, maxStints) {
   return out;
 }
 
-// After simulation, extract the actual stint sequence from events and
-// equal-distribute laps across consecutive same-compound stints.
-// Uses ACTUAL laps from simulation (not estimated), then re-simulates.
-// Returns the re-simulated result, or the original if rebalancing doesn't help.
+// ── Rules filter ──────────────────────────────────────
+function passesRules(tireSeq, inp) {
+  const names = new Set(tireSeq.map(t => t.name));
+  for (const mand of inp.mandatoryTires) {
+    if (!names.has(mand)) return false;
+  }
+  if (names.size < inp.minCompounds) return false;
+  return true;
+}
+
 function rebalanceResult(originalResult, inp) {
-  // Extract stint events in order
   const stintEvents = originalResult.events.filter(e => e.kind === 'stint');
   if (stintEvents.length < 2) return originalResult;
-
-  // Build a plan from actual stint events (merge segments from same planned stint back together?
-  // No — each stint event IS one planned stint segment; fuel stops already split them.
-  // We only rebalance runs where NO fuel stop interrupts them (clean same-compound stints).
-  // Strategy: group consecutive same-compound stints that have no fuelstop between them.
   const newStints = stintEvents.map(e => ({ tire: e.tire, laps: e.laps }));
-
-  // Find runs of consecutive same-compound stints in the event stream
-  // (ignoring fuelstop events which happen INSIDE a stint, not between them)
   let changed = false;
   let i = 0;
   while (i < newStints.length) {
@@ -355,10 +422,7 @@ function rebalanceResult(originalResult, inp) {
     }
     i = j;
   }
-
   if (!changed) return originalResult;
-
-  // Re-simulate with the rebalanced plan
   const rebalResult = simulate(newStints, inp);
   if (!rebalResult || rebalResult.lapsDone < 1) return originalResult;
   return isBetter(rebalResult, originalResult, inp) || rebalResult.lapsDone === originalResult.lapsDone
@@ -372,8 +436,10 @@ function calculateStrategies(inp) {
   const byKey     = new Map();
 
   for (const tireSeq of seqs) {
-    // Cap targetLaps at max capacity (sum of tire lives).
-    // Without this, S×5×4 gets targetLaps=26 > maxCapacity=20 and allocateGreedy returns null.
+
+    // ── Apply rules filter ──
+    if (!passesRules(tireSeq, inp)) continue;
+
     const maxCapacity = tireSeq.reduce((s, t) => s + t.life, 0);
     let targetLaps;
     if (inp.raceMode === 'laps') {
@@ -385,11 +451,10 @@ function calculateStrategies(inp) {
       targetLaps      = Math.min(maxCapacity, Math.ceil((inp.raceLimitSecs - pitBudget) / minLap) + n + 2);
     }
 
-    // Try all allocators; keep best simulation per compound sequence
     const allocs = [
       allocateGreedy(tireSeq, targetLaps),
       allocateLastFull(tireSeq, targetLaps),
-      allocateFuelAligned(tireSeq, targetLaps, inp), // null in TIME mode
+      allocateFuelAligned(tireSeq, targetLaps, inp),
     ].filter(Boolean);
 
     const seen = new Set();
@@ -397,11 +462,9 @@ function calculateStrategies(inp) {
       const sig = alloc.join(",");
       if (seen.has(sig)) continue;
       seen.add(sig);
-
       const plan   = tireSeq.map((t, i) => ({ tire: t, laps: alloc[i] }));
       const result = simulate(plan, inp);
       if (!result || result.lapsDone < 1) continue;
-
       const key      = tireSeq.map(t => t.name).join("→");
       const existing = byKey.get(key);
       if (!existing || isBetter(result, existing, inp)) {
@@ -410,25 +473,18 @@ function calculateStrategies(inp) {
     }
   }
 
-  // Post-process 1: equal-distribute same-compound consecutive stints using actual laps
   for (const [key, result] of byKey) {
     byKey.set(key, rebalanceResult(result, inp));
   }
 
-  // Post-process 2: remove dominated same-compound multi-stint strategies.
-  // If H→H exists but H also exists and is equal/better, H→H is wasteful — drop it.
-  // A same-compound multi-stint is only valid if tire life forced the split
-  // (i.e. any single stint in it ran to full tire life).
   for (const [key, result] of byKey) {
     const stints = result.events.filter(e => e.kind === 'stint');
     if (stints.length < 2) continue;
     const allSame = stints.every(s => s.tire.name === stints[0].tire.name);
     if (!allSame) continue;
-    // All stints are same compound — check if tire life was actually the constraint
     const life = stints[0].tire.life;
     const totalLaps = stints.reduce((s, e) => s + e.laps, 0);
-    if (totalLaps > life) continue; // total exceeds one tire life — stop was necessary, keep it
-    // No stint hit tire life — this stop was unnecessary, drop it
+    if (totalLaps > life) continue;
     byKey.delete(key);
   }
 
@@ -456,12 +512,6 @@ function fmtTime(s) {
 }
 
 // ── Render events ─────────────────────────────────────
-//
-//  Format:
-//    Stint after fuel-free tire change: [Soft ×10] › [Hard ×10]
-//    Stint after tire change with fuel: [Soft ×10] › [Hard ×10  fuel +50L]
-//    Unplanned fuel-only stop:          [Soft ×4] › [fuel only +30L] › [Soft ×6]
-//
 function renderEvents(events) {
   const items = [];
 
@@ -472,17 +522,13 @@ function renderEvents(events) {
       items.push({
         html: `<div class="pit-fuel-only">fuel only +${Math.round(ev.fuelAdded)}L</div>`
       });
-
     } else if (ev.kind === 'stint') {
-      // Check if immediately preceded by a tirechange with fuel
       const prev = i > 0 ? events[i - 1] : null;
       const fuelTag = prev?.kind === 'tirechange' && prev.fuelAdded > 0
         ? `<span class="stint-fuel"> fuel +${Math.round(prev.fuelAdded)}L</span>`
         : '';
-
       const isHard   = ev.tire.color === '#ffffff';
       const dotStyle = `background:${ev.tire.color};${isHard ? 'border:1px solid rgba(255,255,255,0.4);' : ''}`;
-
       items.push({
         html: `<div class="stint-pill">
           <div class="stint-dot" style="${dotStyle}"></div>
@@ -490,7 +536,6 @@ function renderEvents(events) {
         </div>`
       });
     }
-    // tirechange: consumed by next stint pill above
   }
 
   return items.map((item, i) => {
@@ -504,7 +549,11 @@ function render(results, inp) {
   resultsBox.innerHTML = "";
 
   if (!results.length) {
-    resultsBox.innerHTML = `<div class="result-message error">No valid strategies found. Check your tire data.</div>`;
+    const hasRules = inp.mandatoryTires.length > 0 || inp.minCompounds > 1;
+    const hint = hasRules
+      ? " Your mandatory tire or minimum compound rules may be filtering out all valid strategies — try relaxing them."
+      : " Check your tire data.";
+    resultsBox.innerHTML = `<div class="result-message error">No valid strategies found.${hint}</div>`;
     return;
   }
 
@@ -532,7 +581,7 @@ function render(results, inp) {
 
 // ── Calculate ─────────────────────────────────────────
 calcBtn.addEventListener("click", () => {
-  document.querySelectorAll(".strategy-panel input").forEach(inp => validate(inp));
+  document.querySelectorAll(".strategy-panel input[type='number']").forEach(inp => validate(inp));
 
   if (document.querySelectorAll(".field.has-error").length > 0) {
     resultsBox.innerHTML = `<div class="result-message error">Fix the errors above before calculating.</div>`;
@@ -548,6 +597,14 @@ calcBtn.addEventListener("click", () => {
   if (!inp.tires.length) {
     resultsBox.innerHTML = `<div class="result-message error">Enter data for at least one tire compound.</div>`;
     return;
+  }
+
+  // Validate mandatory tires have data entered
+  for (const mand of inp.mandatoryTires) {
+    if (!inp.tires.find(t => t.name === mand)) {
+      resultsBox.innerHTML = `<div class="result-message error">You've marked ${mand} as mandatory but haven't entered ${mand} tire data above.</div>`;
+      return;
+    }
   }
 
   calcBtn.textContent = "Calculating…";
@@ -569,9 +626,13 @@ calcBtn.addEventListener("click", () => {
 
 // ── Clear ─────────────────────────────────────────────
 clearBtn.addEventListener("click", () => {
-  document.querySelectorAll(".strategy-panel input").forEach(i => i.value = "");
+  document.querySelectorAll(".strategy-panel input[type='number']").forEach(i => i.value = "");
   document.querySelectorAll(".field").forEach(f => f.classList.remove("has-error"));
   document.querySelectorAll(".error-msg").forEach(e => e.textContent = "");
+  // Reset mandatory buttons
+  mandActive.clear();
+  mandBtns.forEach(b => { b.classList.remove("active"); b.setAttribute("aria-pressed","false"); });
+  updateSlider(1);
   resultsBox.innerHTML = `<div class="results-placeholder"><div class="placeholder-label">Results appear here</div></div>`;
   raceMode = "laps";
   raceLengthInput.placeholder = "Total laps";
