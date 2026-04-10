@@ -630,7 +630,7 @@ overlay.addEventListener("click", e => {
 /* ================== DIMENSION BUBBLE ================== */
 {
   let _dimSpec   = 'gt';
-  let _dimScreen = null; // null | 'single' | 'triple'
+  let _dimScreen = null;
 
   function getDims() {
     const isKart = _dimSpec === 'kart';
@@ -650,7 +650,7 @@ overlay.addEventListener("click", e => {
     'right:72px',
     'top:50%',
     'transform:translateY(-50%)',
-    'background:rgba(0,0,0,0.55)',
+    'background:rgba(0,0,0,0.82)',
     'border:1.5px solid #1677ff',
     'border-radius:12px',
     'padding:12px 16px',
@@ -669,7 +669,7 @@ overlay.addEventListener("click", e => {
   ].join(';');
   document.body.appendChild(dimBubble);
 
-  function renderBubble() {
+  function renderDimBubble() {
     const { height, width, length } = getDims();
     dimBubble.innerHTML =
       `<span style="color:rgba(255,255,255,0.4);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700">Dimensions</span><br>` +
@@ -704,10 +704,12 @@ overlay.addEventListener("click", e => {
   ].join(';');
   document.body.appendChild(dimBtn);
 
-  const dimStyle = document.createElement('style');
-  dimStyle.textContent = `
+  const sharedBtnStyle = document.createElement('style');
+  sharedBtnStyle.textContent = `
     #rulerBtn:hover  { border-color:rgba(255,255,255,0.45)!important; color:#fff!important; }
     #rulerBtn.active { border-color:#1677ff!important; color:#1677ff!important; background:rgba(22,119,255,0.12)!important; }
+    #seatBtn:hover   { border-color:rgba(255,255,255,0.45)!important; color:#fff!important; }
+    #seatBtn.active  { border-color:#fea700!important; color:#fea700!important; background:rgba(254,167,0,0.12)!important; }
     @media (orientation: portrait) {
       #rulerBtn {
         top: calc(48px + (55vh - 48px) * 0.25) !important;
@@ -719,17 +721,135 @@ overlay.addEventListener("click", e => {
         right: 64px !important;
         transform: none !important;
       }
+      #seatBtn {
+        top: calc(48px + (55vh - 48px) * 0.25 + 52px) !important;
+        right: 12px !important;
+        transform: none !important;
+      }
+      #seatBubble {
+        top: calc(48px + (55vh - 48px) * 0.25 + 52px) !important;
+        right: 64px !important;
+        transform: none !important;
+      }
     }
   `;
-  document.head.appendChild(dimStyle);
+  document.head.appendChild(sharedBtnStyle);
 
+  // ── Seat bubble (declared here so dimBtn click can reference it) ──
+  const seatBubble = document.createElement('div');
+  seatBubble.id = 'seatBubble';
+  seatBubble.style.cssText = [
+    'position:fixed',
+    'right:72px',
+    'top:calc(50% + 52px)',
+    'transform:translateY(-50%)',
+    'background:rgba(0,0,0,0.82)',
+    'border:1.5px solid #fea700',
+    'border-radius:12px',
+    'padding:14px 16px',
+    'color:#fff',
+    'font-family:system-ui,sans-serif',
+    'font-size:13px',
+    'font-weight:500',
+    'line-height:1.9',
+    'white-space:nowrap',
+    'z-index:10',
+    'display:none',
+    'backdrop-filter:blur(8px)',
+    '-webkit-backdrop-filter:blur(8px)',
+    'box-shadow:0 4px 24px rgba(254,167,0,0.15)',
+  ].join(';');
+  seatBubble.innerHTML =
+    `<span style="color:rgba(255,255,255,0.4);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700">Seat Options</span><br>` +
+    `<span style="color:rgba(255,255,255,0.5)">Used Car Seat</span><span style="color:#fff;font-weight:600;margin-left:6px">From ₹2,000</span><br>` +
+    `<span style="font-size:11px;color:rgba(255,255,255,0.35);display:block;margin-bottom:4px;margin-top:-4px">Most comfortable and best value. Built for real driving, perfect for long sessions.</span>` +
+    `<span style="color:rgba(255,255,255,0.5)">Simulator Seat</span><span style="color:#fff;font-weight:600;margin-left:6px">₹6,500</span><br>` +
+    `<span style="font-size:11px;color:rgba(255,255,255,0.35);display:block;margin-bottom:4px;margin-top:-4px">Affordable and clean-looking. Easy fit, but less comfortable over time.
+</span>` +
+    `<span style="color:rgba(255,255,255,0.5)">Fiberglass Seat</span><span style="color:#fff;font-weight:600;margin-left:6px">From ₹16,500</span><br>` +
+    `<span style="font-size:11px;color:rgba(255,255,255,0.35);display:block;margin-bottom:6px;margin-top:-4px">Rigid and race-focused. Best for serious setups, overkill for most.</span>` +
+`<div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:2px;font-size:12px;color:rgba(255,255,255,0.4);">` +
+`For more info <a href="/seats/" target="_blank" style="color:#fea700;font-weight:700;text-decoration:none;">click here →</a></div>`;
+  document.body.appendChild(seatBubble);
+
+  const seatBtn = document.createElement('button');
+  seatBtn.id = 'seatBtn';
+  seatBtn.title = 'Seat options';
+seatBtn.innerHTML = `Seat`;
+'font-size:12px',
+'font-weight:700',
+'letter-spacing:1px',
+'text-transform:uppercase',
+  seatBtn.style.cssText = [
+    'position:fixed',
+    'right:20px',
+    'top:calc(50% + 52px)',
+    'transform:translateY(-50%)',
+    'width:44px',
+    'height:44px',
+    'border-radius:50%',
+    'background:rgba(20,20,20,0.85)',
+    'border:1.5px solid rgba(255,255,255,0.18)',
+    'color:rgba(255,255,255,0.6)',
+    'cursor:pointer',
+    'display:flex',
+    'align-items:center',
+    'justify-content:center',
+    'z-index:10',
+    'backdrop-filter:blur(6px)',
+    '-webkit-backdrop-filter:blur(6px)',
+    'transition:border-color 0.2s,color 0.2s,background 0.2s',
+  ].join(';');
+  document.body.appendChild(seatBtn);
+
+  /* ── Helper: close dim bubble ── */
+  function closeDimBubble() {
+    dimBubble.style.display = 'none';
+    dimBtn.classList.remove('active');
+  }
+
+  /* ── Helper: close seat bubble ── */
+  function closeSeatBubble() {
+    seatBubble.style.display = 'none';
+    seatBtn.classList.remove('active');
+  }
+
+  /* ── Ruler button click — closes seat bubble first ── */
   dimBtn.addEventListener('click', () => {
-    const show = dimBubble.style.display === 'none';
-    dimBubble.style.display = show ? '' : 'none';
-    dimBtn.classList.toggle('active', show);
-    if (show) renderBubble();
+    const opening = dimBubble.style.display === 'none';
+    if (opening) {
+      closeSeatBubble();          // close seat if open
+      renderDimBubble();
+      dimBubble.style.display = '';
+      dimBtn.classList.add('active');
+    } else {
+      closeDimBubble();
+    }
   });
 
+  /* ── Seat button click — closes dim bubble first ── */
+  seatBtn.addEventListener('click', () => {
+    const opening = seatBubble.style.display === 'none';
+    if (opening) {
+      closeDimBubble();           // close ruler if open
+      seatBubble.style.display = '';
+      seatBtn.classList.add('active');
+    } else {
+      closeSeatBubble();
+    }
+  });
+
+  /* ── Click anywhere else closes both ── */
+  document.addEventListener('click', e => {
+    if (!dimBtn.contains(e.target) && !dimBubble.contains(e.target)) {
+      closeDimBubble();
+    }
+    if (!seatBtn.contains(e.target) && !seatBubble.contains(e.target)) {
+      closeSeatBubble();
+    }
+  });
+
+  /* ── Keep dim screen tracker in sync ── */
   const _origSelectScreen = window.selectScreen;
   window.selectScreen = function(file, btn) {
     _origSelectScreen(file, btn);
@@ -737,7 +857,7 @@ overlay.addEventListener("click", e => {
     _dimScreen = isNowActive
       ? (file.includes('Triple') ? 'triple' : 'single')
       : null;
-    if (dimBubble.style.display !== 'none') renderBubble();
+    if (dimBubble.style.display !== 'none') renderDimBubble();
   };
 
   const _origSwitchSpec = window.switchSpec;
@@ -745,6 +865,6 @@ overlay.addEventListener("click", e => {
     _origSwitchSpec(spec, btn);
     _dimSpec   = spec;
     _dimScreen = null;
-    if (dimBubble.style.display !== 'none') renderBubble();
+    if (dimBubble.style.display !== 'none') renderDimBubble();
   };
 }
