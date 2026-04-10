@@ -647,7 +647,11 @@ overlay.addEventListener("click", e => {
   dimBubble.id = 'dimBubble';
   dimBubble.style.cssText = [
     'position:fixed',
-    'right:72px',
+'position:fixed',
+'right:76px',   // space for button + margin
+'left:auto',
+'width:320px',
+'max-width:calc(100vw - 100px)',
     'top:50%',
     'transform:translateY(-50%)',
     'background:rgba(0,0,0,0.82)',
@@ -659,7 +663,8 @@ overlay.addEventListener("click", e => {
     'font-size:13px',
     'font-weight:500',
     'line-height:2',
-    'white-space:nowrap',
+    'white-space:normal',
+    'word-break:break-word',
     'pointer-events:none',
     'z-index:10',
     'display:none',
@@ -716,21 +721,28 @@ overlay.addEventListener("click", e => {
         right: 12px !important;
         transform: none !important;
       }
-      #dimBubble {
-        top: calc(48px + (55vh - 48px) * 0.25) !important;
-        right: 64px !important;
-        transform: none !important;
-      }
+#dimBubble {
+  top: calc(48px + (55vh - 48px) * 0.25) !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translate(-50%, -50%) !important;
+  width: calc(100vw - 24px) !important;
+  max-width: 420px;
+}
       #seatBtn {
         top: calc(48px + (55vh - 48px) * 0.25 + 52px) !important;
         right: 12px !important;
         transform: none !important;
       }
-      #seatBubble {
-        top: calc(48px + (55vh - 48px) * 0.25 + 52px) !important;
-        right: 64px !important;
-        transform: none !important;
-      }
+
+#seatBubble {
+  top: calc(48px + (55vh - 48px) * 0.25 + 52px) !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translate(-50%, -50%) !important;
+  width: calc(100vw - 24px) !important;
+  max-width: 420px;
+}
     }
   `;
   document.head.appendChild(sharedBtnStyle);
@@ -740,7 +752,11 @@ overlay.addEventListener("click", e => {
   seatBubble.id = 'seatBubble';
   seatBubble.style.cssText = [
     'position:fixed',
-    'right:72px',
+'position:fixed',
+'right:76px',   // space for button + margin
+'left:auto',
+'width:320px',
+'max-width:calc(100vw - 100px)',
     'top:calc(50% + 52px)',
     'transform:translateY(-50%)',
     'background:rgba(0,0,0,0.82)',
@@ -752,7 +768,8 @@ overlay.addEventListener("click", e => {
     'font-size:13px',
     'font-weight:500',
     'line-height:1.9',
-    'white-space:nowrap',
+    'white-space:normal',
+    'word-break:break-word',
     'z-index:10',
     'display:none',
     'backdrop-filter:blur(8px)',
