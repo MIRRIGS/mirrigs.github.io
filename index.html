@@ -45,6 +45,29 @@
 <div id="topbar">
 
   <div id="specSwitch">
+
+    <div id="specDropdownWrap">
+
+  <button id="specDropdownBtn" aria-haspopup="true" aria-expanded="false">
+    Cockpit
+       <span class="new-badge">NEW</span>
+  </button>
+  <div id="specDropdown" class="dropdown-menu" role="menu">
+<a href="#" class="dropdown-item active" data-spec="gt">
+  GT-Spec
+</a>
+<a href="#" class="dropdown-item" data-spec="kart">
+  Kart-Spec
+</a>
+<a href="#" class="dropdown-item" data-spec="pit">
+  Pit-Spec
+   <span class="new-badge">NEW</span>
+</a>
+</a>
+  </div>
+
+</div>
+
     <button
       class="spec-btn active"
       onclick="switchSpec('gt', this)"
@@ -59,14 +82,22 @@
       data-tooltip-type="spec"
       data-tooltip-text="A compact karting-style cockpit made for small spaces, easy storage, and affordable setups. It can be folded or stored in an area as small as 20 by 20 inches."
     >Kart-Spec</button>
+    <button
+  class="spec-btn"
+  onclick="switchSpec('pit', this)"
+  data-tooltip
+  data-tooltip-type="spec"
+  data-tooltip-text="A compact aluminium profile cockpit designed for smaller spaces. When you’re ready, upgrade to a full GT-Spec by replacing just two aluminium profiles—no new cockpit required."
+>Pit-Spec <span class="new-badge">NEW</span>
+</button>
   </div>
 
   <div id="rightBlock">
 
     <div id="logoDropdownWrap">
       <button id="logoDropdownBtn" aria-haspopup="true" aria-expanded="false">
-        ☰ Menu
-      </button>
+  <span class="menu-icon">☰</span> Menu
+</button>
       <div id="logoDropdown" class="dropdown-menu" role="menu">
         <a href="/" class="dropdown-item active">3D Viewer</a>
         <a href="/about" class="dropdown-item">About</a>
@@ -100,7 +131,7 @@
     <button
       class="color black"
       onclick="setCockpitColor('black', this)"
-      data-tooltip="Black powder-coated cockpits cost an extra ₹2,000. Custom colors are also available."
+      data-tooltip="Black annodized cockpits cost an extra ₹3,000. Custom colors are also available."
     >
       <span class="swatch black"></span> Black
     </button>
@@ -108,30 +139,29 @@
 
   <hr>
 
-  <h3>Screen Mount</h3>
-
-  <button onclick="selectScreen('GT_Monitor_Single_Integrated.glb', this)" data-tooltip="Compatible with standard VESA TV and monitor mounts. Integrated mounts cannot be used with the PS5 holder.">
-    Single Integrated
-    <span class="price" data-price-display data-base-price="6500" data-black-extra="600">(₹6,500)</span>
-  </button>
-  <button onclick="selectScreen('GT_Monitor_Single_Standalone.glb', this)" data-tooltip="Compatible with standard VESA TV and monitor mounts.">
+  <div class="gt-kart-only">
+    <h3>Screen Mount</h3>
+    <button onclick="selectScreen('GT_Monitor_Single_Integrated.glb', this)" data-tooltip="Compatible with standard VESA TV and monitor mounts. Integrated mounts cannot be used with the PS5 holder.">
+  
+  Single Integrated
+<span class="price" data-price-display data-base-price="9400" data-black-extra="600">(₹9,400)</span>  <button onclick="selectScreen('GT_Monitor_Single_Standalone.glb', this)" data-tooltip="Compatible with standard VESA TV and monitor mounts.">
     Single Standalone
-    <span class="price" data-price-display data-base-price="8000" data-black-extra="600">(₹8,000)</span>
-  </button>
+<span class="price" data-price-display data-base-price="11400" data-black-extra="600">(₹11,400)</span>  </button>
   <button onclick="selectScreen('GT_Monitor_Triple_Integrated.glb', this)" data-tooltip="Compatible with standard VESA TV and monitor mounts. Integrated mounts cannot be used with the PS5 holder.">
     Triple Integrated
-    <span class="price" data-price-display data-base-price="10000" data-black-extra="1000">(₹10,000)</span>
-  </button>
+<span class="price" data-price-display data-base-price="14400" data-black-extra="600">(₹14,400)</span>  </button>
   <button onclick="selectScreen('GT_Monitor_Triple_Standalone.glb', this)" data-tooltip="Compatible with standard VESA TV and monitor mounts.">
     Triple Standalone
-    <span class="price" data-price-display data-base-price="13000" data-black-extra="1000">(₹13,000)</span>
-  </button>
+<span class="price" data-price-display data-base-price="16400" data-black-extra="600">(₹16,400)</span>  </button>
 
-  <hr>
+</div>
 
-  <h3>Accessories</h3>
+<div class="gt-only">
 
-  <div class="gt-only">
+<hr>
+
+<h3>Accessories</h3>
+
     <button onclick="selectShifter('GT_Shifter_Big.glb', this)" data-tooltip="Designed for heavy-duty shifters and handbrakes. Also reinforces the wheel mount for improved rigidity.">
       Pro Shifter Mount
       <span class="price" data-price-display data-base-price="6500" data-black-extra="800">(₹6,500)</span>
@@ -154,6 +184,7 @@
   </div>
 
   <div class="kart-only">
+    <h3>Accessories</h3>
     <button onclick="toggleAddon('KART_Verticle.glb', this)" data-tooltip="Used for users who need to fold or store their cockpit when not in use.">
       Vertical Supports <span class="price">(₹0)</span>
     </button>
@@ -174,22 +205,26 @@
     </button>
   </div>
 
-  <h3>Castor Wheels</h3>
+<div class="pit-only">
 
-  <div class="gt-only">
-    <button onclick="selectWheels('GT_Wheels_4.glb', this)" data-tooltip="Paintable in any color. Lockable design keeps the cockpit firmly in place.">
-      4 Wheels <span class="price">(₹4,000)</span>
-    </button>
+<h3>Accessories</h3>
+
+<button onclick="selectShifter('PIT_Shifter_Small.glb', this)">
+    Basic Shifter Mount <span class="price">(₹3,000)</span>
+</button>
+<button onclick="toggleAddon('PIT_Cupholder.glb', this)">
+    Cupholder <span class="price">(₹1,000)</span>
+</button>
+<button onclick="toggleAddon('PIT_Headphone_Mount.glb', this)">
+    Headset Mount <span class="price">(₹1,000)</span>
+</button>
+</div>
+<div class="gt-kart-only">
+<h3>Castor Wheels</h3>
+<button onclick="selectWheels('GT_Wheels_4.glb', this)" data-tooltip="Paintable in any color. Lockable design keeps the cockpit firmly in place.">
+  4 Wheels <span class="price">(₹4,000)</span>
+</button>
     <button onclick="selectWheels('GT_Wheels_6.glb', this)" data-tooltip="Paintable in any color. Lockable design keeps the cockpit firmly in place. Recommended for users over 100 kg.">
-      6 Wheels <span class="price">(₹6,000)</span>
-    </button>
-  </div>
-
-  <div class="kart-only">
-    <button onclick="selectWheels('GT_Wheels_4.glb', this)" data-tooltip="Paintable in any color. Lockable design keeps the cockpit firmly in place. Cannot be used with vertical supports or legs.">
-      4 Wheels <span class="price">(₹4,000)</span>
-    </button>
-    <button onclick="selectWheels('GT_Wheels_6.glb', this)" data-tooltip="Paintable in any color. Lockable design keeps the cockpit firmly in place. Recommended for users over 100 kg. Cannot be used with vertical supports or legs.">
       6 Wheels <span class="price">(₹6,000)</span>
     </button>
   </div>
@@ -228,13 +263,27 @@
   <span class="text">Drag to rotate</span>
 </div>
 
+<div id="viewerSpec">GT-SPEC</div>
+
 <div id="viewerBrand">MIR RIGS</div>
+
+<div id="loadingModel">
+    <div class="loaderLogo">
+        <span class="logoBase">MIR RIGS</span>
+        <span class="logoGlow">MIR RIGS</span>
+    </div>
+
+    <div class="loaderText">
+        Loading...
+    </div>
+</div>
 
 <script>
   const dropBtn = document.getElementById("logoDropdownBtn");
   const dropMenu = document.getElementById("logoDropdown");
 
   dropBtn.addEventListener("click", e => {
+    e.preventDefault();
     e.stopPropagation();
     const isOpen = dropMenu.classList.toggle("show");
     dropBtn.setAttribute("aria-expanded", isOpen);
@@ -256,6 +305,47 @@
   document.getElementById("finalizeBtn").addEventListener("click", () => {
     gtag('event', 'finalize_clicked');
   });
+
+/* ================= COCKPIT DROPDOWN ================= */
+
+const specBtn = document.getElementById("specDropdownBtn");
+const specMenu = document.getElementById("specDropdown");
+if (specBtn && specMenu) {
+  specBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    dropMenu.classList.remove("show");
+    dropBtn.setAttribute("aria-expanded", false);
+    const isOpen = specMenu.classList.toggle("show");
+    specBtn.setAttribute("aria-expanded", isOpen);
+  });
+  specMenu.querySelectorAll(".dropdown-item").forEach(item => {
+    item.addEventListener("click", e => {
+       e.preventDefault();
+      e.stopPropagation();
+      const spec = item.dataset.spec;
+      const btn = document.querySelector(
+        '#specSwitch .spec-btn[onclick*="' + spec + '"]'
+      );
+if (btn) {
+  btn.click();
+  if (window.showSpecTooltip) window.showSpecTooltip(btn);
+}
+specMenu.querySelectorAll(".dropdown-item").forEach(i => {
+  i.classList.remove("active");
+});
+
+item.classList.add("active");
+specMenu.classList.remove("show");
+      specBtn.setAttribute("aria-expanded", false);
+    });
+  });
+  document.addEventListener("click", () => {
+    specMenu.classList.remove("show");
+    specBtn.setAttribute("aria-expanded", false);
+  });
+
+}
+
 </script>
 
 <script type="module" src="main.js"></script>

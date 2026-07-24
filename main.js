@@ -3,16 +3,31 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 /* ================== PRICING RULES ================== */
-const BASE_GT_SILVER = 20000;
-const BASE_KART_SILVER = 15000;
-const BLACK_UPCHARGE = 2000;
+const BASE_GT_SILVER = 22000;
+const BASE_KART_SILVER = 18500;
+const BASE_PIT_SILVER = 16500;
+const BLACK_UPCHARGE = 3000;
 const BLACK_SINGLE_SCREEN_EXTRA = 600;
-const BLACK_TRIPLE_SCREEN_EXTRA = 1000;
+const BLACK_TRIPLE_SCREEN_EXTRA = 600;
 const BLACK_BIG_SHIFTER_EXTRA = 800;
 
 /* ================== STATE ================== */
 let cockpitColor = "silver";
 let currentSpec = "gt";
+function updateViewerSpec() {
+  const label = document.getElementById("viewerSpec");
+  if (!label) return;
+  switch (currentSpec) {
+    case "kart":
+      label.textContent = "KART-SPEC";
+      break;
+    case "pit":
+      label.textContent = "PIT-SPEC";
+      break;
+    default:
+      label.textContent = "GT-SPEC";
+  }
+}
 const selected = {
   screen: null,
   shifter: null,
@@ -23,6 +38,9 @@ const selected = {
 function resolveModelFile(file) {
   if (currentSpec === "kart" && file.startsWith("GT_")) {
     return file.replace("GT_", "KART_");
+  }
+  if (currentSpec === "pit" && file.startsWith("GT_")) {
+    return file.replace("GT_", "PIT_");
   }
   return file;
 }
@@ -41,20 +59,21 @@ function verticalSupportsBlocked() {
 
 /* ================== PART PRICES ================== */
 const prices = {
-  screens: {
-    "GT_Monitor_Single_Standalone.glb": 8000,
-    "GT_Monitor_Single_Integrated.glb": 6500,
-    "GT_Monitor_Triple_Standalone.glb": 13000,
-    "GT_Monitor_Triple_Integrated.glb": 10000,
-    "KART_Monitor_Single_Standalone.glb": 8000,
-    "KART_Monitor_Single_Integrated.glb": 6500,
-    "KART_Monitor_Triple_Standalone.glb": 13000,
-    "KART_Monitor_Triple_Integrated.glb": 10000
-  },
+screens: {
+    "GT_Monitor_Single_Standalone.glb": 11400,
+    "GT_Monitor_Single_Integrated.glb": 9400,
+    "GT_Monitor_Triple_Standalone.glb": 16400,
+    "GT_Monitor_Triple_Integrated.glb": 14400,
+    "KART_Monitor_Single_Standalone.glb": 11400,
+    "KART_Monitor_Single_Integrated.glb": 9400,
+    "KART_Monitor_Triple_Standalone.glb": 16400,
+    "KART_Monitor_Triple_Integrated.glb": 14400
+},
   shifter: {
     "GT_Shifter_Big.glb": 6500,
     "GT_Shifter_Small.glb": 3000,
-    "KART_Shifter_Small.glb": 3000
+    "KART_Shifter_Small.glb": 3000,
+    "PIT_Shifter_Small.glb": 3000,
   },
   wheels: {
     "GT_Wheels_4.glb": 4000,
@@ -71,7 +90,9 @@ const prices = {
     "KART_Legs.glb": 1500,
     "KART_Cupholder.glb": 1000,
     "KART_Headphone_Mount.glb": 1000,
-    "KART_PS5_Holder.glb": 1500
+    "KART_PS5_Holder.glb": 1500,
+    "PIT_Cupholder.glb": 1000,
+    "PIT_Headphone_Mount.glb": 1000
   }
 };
 
@@ -174,6 +195,7 @@ const models = {};
 const files = [
   "GT_Cockpit_Base.glb",
   "KART_Cockpit_Base.glb",
+  "PIT_Cockpit_Base.glb",
   ...Object.keys(prices.screens),
   ...Object.keys(prices.shifter),
   ...Object.keys(prices.wheels),
@@ -181,23 +203,65 @@ const files = [
 ];
 
 const uniqueFiles = [...new Set(files)];
+let loadedModels = 0;
+const totalModels = uniqueFiles.length;
+
+setTimeout(() => {
+  if (loadedModels < totalModels) {
+    const loading = document.getElementById("loadingModel");
+    if (loading) {
+      loading.style.display = "flex";
+    }
+  }
+}, 1000);
 
 uniqueFiles.forEach(file => {
-  loader.load(`models/${file}`, gltf => {
-    const obj = gltf.scene;
-    if (file.startsWith("GT_")) {
-      obj.visible = file === "GT_Cockpit_Base.glb";
-    } else if (file.startsWith("KART_")) {
-      obj.visible = false;
+  loader.load(
+    `models/${file}`,
+    gltf => {
+      const obj = gltf.scene;
+      if (file.startsWith("GT_")) {
+        obj.visible = file === "GT_Cockpit_Base.glb";
+      } else if (
+        file.startsWith("KART_") ||
+        file.startsWith("PIT_")
+      ) {
+        obj.visible = false;
+      }
+      scene.add(obj);
+      models[file] = obj;
+
+      loadedModels++;
+      if (loadedModels === totalModels) {
+        const loading = document.getElementById("loadingModel");
+        if (loading) {
+          loading.style.display = "none";
+        }
+      }
+    },
+    undefined,
+    err => {
+      console.error("Failed to load", file, err);
+
+      loadedModels++;
+      if (loadedModels === totalModels) {
+        const loading = document.getElementById("loadingModel");
+        if (loading) {
+          loading.style.display = "none";
+        }
+      }
     }
-    scene.add(obj);
-    models[file] = obj;
+  );
   });
-});
 
 /* ================== PRICE CALCULATION ================== */
 function calculateTotal() {
-  let total = currentSpec === "kart" ? BASE_KART_SILVER : BASE_GT_SILVER;
+let total =
+  currentSpec === "gt"
+    ? BASE_GT_SILVER
+    : currentSpec === "kart"
+    ? BASE_KART_SILVER
+    : BASE_PIT_SILVER;
 
   if (cockpitColor === "black") total += BLACK_UPCHARGE;
 
@@ -411,26 +475,49 @@ window.togglePS5 = btn => {
 window.switchSpec = (spec, btn) => {
   if (currentSpec === spec) return;
 
-  if (models["GT_Cockpit_Base.glb"]) models["GT_Cockpit_Base.glb"].visible = spec === "gt";
-  if (models["KART_Cockpit_Base.glb"]) models["KART_Cockpit_Base.glb"].visible = spec === "kart";
+  if (models["GT_Cockpit_Base.glb"])
+    models["GT_Cockpit_Base.glb"].visible = spec === "gt";
+
+if (models["KART_Cockpit_Base.glb"])
+    models["KART_Cockpit_Base.glb"].visible = spec === "kart";
+
+if (models["PIT_Cockpit_Base.glb"])
+    models["PIT_Cockpit_Base.glb"].visible = spec === "pit";
 
   if (spec === "kart") {
     if (selected.screen && models[selected.screen]) models[selected.screen].visible = false;
     selected.screen = null;
     Object.keys(models).forEach(k => {
       if (k.startsWith("GT_") && k !== "GT_Cockpit_Base.glb") models[k].visible = false;
+      if (k.startsWith("PIT_")) models[k].visible = false;
     });
-  }
+}
 
-  if (spec === "gt") {
+if (spec === "gt") {
     Object.keys(models).forEach(k => {
       if (k.startsWith("KART_")) models[k].visible = false;
+      if (k.startsWith("PIT_")) models[k].visible = false;
     });
-  }
+}
+
+if (spec === "pit") {
+    if (selected.screen && models[selected.screen]) models[selected.screen].visible = false;
+    selected.screen = null;
+
+    Object.keys(models).forEach(k => {
+      if (k.startsWith("GT_") && k !== "GT_Cockpit_Base.glb") {
+        models[k].visible = false;
+      }
+      if (k.startsWith("KART_")) {
+        models[k].visible = false;
+      }
+    });
+}
 
   document.querySelectorAll(".spec-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
   currentSpec = spec;
+  updateViewerSpec();
 
   clearActive("[onclick^='selectScreen']");
   clearActive("[onclick^='selectShifter']");
@@ -441,10 +528,20 @@ window.switchSpec = (spec, btn) => {
   selected.screen = null;
   selected.shifter = null;
   selected.wheels = null;
-  selected.addons.clear();
+  selected.addons.forEach(a => {
+    if (models[a]) models[a].visible = false;});
+    selected.addons.clear();
 
-  document.body.classList.toggle("kart-spec", spec === "kart");
+document.body.classList.remove("kart-spec");
+document.body.classList.remove("pit-spec");
 
+if (spec === "kart") {
+  document.body.classList.add("kart-spec");
+}
+if (spec === "pit") {
+  document.body.classList.add("pit-spec");
+}
+  
   if (spec === "kart") {
     const vs = "KART_Verticle.glb";
     if (models[vs]) {
@@ -476,12 +573,25 @@ function updateCameraOffset() {
   const leftOffset = Math.round(uiRect.right);
   const renderWidth = fullW - leftOffset;
   if (renderWidth <= 0) return;
-
   renderer.setScissorTest(true);
   renderer.setScissor(leftOffset, 0, renderWidth, fullH);
   renderer.setViewport(leftOffset, 0, renderWidth, fullH);
   camera.aspect = renderWidth / fullH;
   camera.updateProjectionMatrix();
+  const loading = document.getElementById("loadingModel");
+if (loading) {
+    loading.style.left = (leftOffset + renderWidth / 2) + "px";
+    loading.style.top = (fullH * 0.50) + "px";
+}
+
+const logo = document.querySelector(".loaderLogo");
+if (logo) {
+    if (isPortrait()) {
+        logo.style.fontSize = "42px";
+    } else {
+        logo.style.fontSize = "56px";
+    }
+}
 }
 
 function animate() {
@@ -501,6 +611,7 @@ window.addEventListener("resize", () => {
 /* ================== DEFAULTS ================== */
 setCockpitColor("silver", document.querySelector(".color.silver"));
 calculateTotal();
+updateViewerSpec();
 
 /* ================== TOOLTIP SYSTEM ================== */
 const tooltip = document.getElementById("tooltip");
@@ -517,6 +628,20 @@ function positionTooltipFromButton(btn) {
     const tWidth = tooltip.offsetWidth || 200;
     tooltip.style.top = `${uiTop - tHeight - pad}px`;
     tooltip.style.left = `${Math.max(pad, (window.innerWidth - tWidth) / 2)}px`;
+    return;
+  }
+
+  // Spec buttons (GT-Spec / Kart-Spec / Pit-Spec) live in the topbar, not
+  // the side panel — anchor the bubble below the button instead, so it
+  // never overlaps the topbar or the buttons next to it.
+  if (btn.dataset.tooltipType === "spec") {
+    const btnRect = btn.getBoundingClientRect();
+    const pad = 10;
+    const tWidth = tooltip.offsetWidth || 260;
+    let left = btnRect.left + btnRect.width / 2 - tWidth / 2;
+    left = Math.max(pad, Math.min(left, window.innerWidth - tWidth - pad));
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${btnRect.bottom + 12}px`;
     return;
   }
 
@@ -573,15 +698,42 @@ document.addEventListener("touchstart", () => {
   if (mobileTooltipTimer) clearTimeout(mobileTooltipTimer);
 });
 
+// Manually show the spec tooltip — used by the mobile cockpit dropdown.
+// Selecting an item there clicks the hidden .spec-btn programmatically,
+// which doesn't fire touchstart, so the bubble never appeared. This
+// reuses the exact same portrait positioning (centered horizontally,
+// sitting right above the bottom UI panel).
+window.showSpecTooltip = (btn) => {
+  if (!btn) return;
+  const text = btn.dataset.tooltipText || btn.getAttribute("data-tooltip");
+  if (!text) return;
+
+  tooltip.innerText = text;
+  tooltip.classList.add("spec-tooltip");
+
+  if (mobileTooltipTimer) clearTimeout(mobileTooltipTimer);
+
+  requestAnimationFrame(() => {
+    positionTooltipFromButton(btn);
+    tooltip.classList.add("show");
+  });
+
+  mobileTooltipTimer = setTimeout(() => {
+    tooltip.classList.remove("show");
+  }, 3000);
+};
+
 /* ================== FINALIZE OVERLAY ================== */
 function buildSummaryText() {
   const parts = [];
 
-  parts.push(
-    currentSpec === "kart"
-      ? cockpitColor === "black" ? "Kart-Spec – Black" : "Kart-Spec – Silver"
-      : cockpitColor === "black" ? "GT-Spec – Black"   : "GT-Spec – Silver"
-  );
+parts.push(
+  currentSpec === "kart"
+    ? cockpitColor === "black" ? "Kart-Spec – Black" : "Kart-Spec – Silver"
+    : currentSpec === "pit"
+    ? cockpitColor === "black" ? "Pit-Spec – Black" : "Pit-Spec – Silver"
+    : cockpitColor === "black" ? "GT-Spec – Black" : "GT-Spec – Silver"
+);
 
   if (selected.screen) {
     if (selected.screen.includes("Single") && selected.screen.includes("Integrated"))  parts.push("Screen Mount – Single Integrated");
@@ -591,14 +743,29 @@ function buildSummaryText() {
   }
 
   if (selected.shifter === "GT_Shifter_Big.glb")                                       parts.push("Shifter – Pro");
-  if (selected.shifter === "GT_Shifter_Small.glb" || selected.shifter === "KART_Shifter_Small.glb") parts.push("Shifter Mount");
+  if (
 
+  selected.shifter === "GT_Shifter_Small.glb" ||
+
+  selected.shifter === "KART_Shifter_Small.glb" ||
+
+  selected.shifter === "PIT_Shifter_Small.glb"
+
+) parts.push("Shifter Mount");
   if (selected.wheels?.includes("4")) parts.push("Castor Wheels – 4");
   if (selected.wheels?.includes("6")) parts.push("Castor Wheels – 6");
 
   selected.addons.forEach(a => {
-    if (a === "GT_Cupholder.glb"       || a === "KART_Cupholder.glb")       parts.push("Cup Holder");
-    if (a === "GT_Headphone_Mount.glb" || a === "KART_Headphone_Mount.glb") parts.push("Headset Mount");
+    if (
+      a === "GT_Cupholder.glb" ||
+      a === "KART_Cupholder.glb" ||
+      a === "PIT_Cupholder.glb"
+    ) parts.push("Cup Holder");    
+    if (
+      a === "GT_Headphone_Mount.glb" ||
+      a === "KART_Headphone_Mount.glb" ||
+      a === "PIT_Headphone_Mount.glb"
+    ) parts.push("Headset Mount");    
     if (a === "GT_PS5_Holder.glb"      || a === "KART_PS5_Holder.glb")      parts.push("PS5 Holder");
     if (a === "GT_Upgraded_Brackets.glb")                                   parts.push("Upgraded Brackets");
     if (a === "KART_Verticle.glb")                                          parts.push("Vertical Supports");
@@ -633,14 +800,22 @@ overlay.addEventListener("click", e => {
   let _dimScreen = null;
 
   function getDims() {
-    const isKart = _dimSpec === 'kart';
-    const heightBase       = isKart ? "1'5\""  : "2'1\"";
-    const heightWithScreen = isKart ? "3'8\""  : "4'4\"";
-    const height = _dimScreen ? heightWithScreen : heightBase;
-    const width  = _dimScreen === 'triple' ? "4'5\""
-                 : _dimScreen === 'single' ? "2'2\""
-                 : "1'11\"";
-    return { height, width, length: "4'7\"" };
+if (_dimSpec === "pit") {
+  return {
+    length: "2'6\"",
+    width: "1'11\"",
+    height: "2'9\""
+  };
+}
+
+const isKart = _dimSpec === 'kart';
+const heightBase       = isKart ? "1'5\"" : "2'1\"";
+const heightWithScreen = isKart ? "3'8\"" : "4'4\"";
+const height = _dimScreen ? heightWithScreen : heightBase;
+const width  = _dimScreen === 'triple' ? "4'5\""
+             : _dimScreen === 'single' ? "2'2\""
+             : "1'11\"";
+return { height, width, length: "4'7\"" };
   }
 
   const dimBubble = document.createElement('div');
@@ -776,27 +951,40 @@ overlay.addEventListener("click", e => {
     '-webkit-backdrop-filter:blur(8px)',
     'box-shadow:0 4px 24px rgba(254,167,0,0.15)',
   ].join(';');
-  seatBubble.innerHTML =
-    `<span style="color:rgba(255,255,255,0.4);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700">Seat Options</span><br>` +
-    `<span style="color:rgba(255,255,255,0.5)">Used Car Seat</span><span style="color:#fff;font-weight:600;margin-left:6px">From ₹2,000</span><br>` +
-    `<span style="font-size:11px;color:rgba(255,255,255,0.35);display:block;margin-bottom:4px;margin-top:-4px">Most comfortable and best value. Built for real driving, perfect for long sessions.</span>` +
-    `<span style="color:rgba(255,255,255,0.5)">Simulator Seat</span><span style="color:#fff;font-weight:600;margin-left:6px">₹6,500</span><br>` +
-    `<span style="font-size:11px;color:rgba(255,255,255,0.35);display:block;margin-bottom:4px;margin-top:-4px">Affordable and clean-looking. Easy fit, but less comfortable over time.
-</span>` +
-    `<span style="color:rgba(255,255,255,0.5)">Fiberglass Seat</span><span style="color:#fff;font-weight:600;margin-left:6px">From ₹16,500</span><br>` +
-    `<span style="font-size:11px;color:rgba(255,255,255,0.35);display:block;margin-bottom:6px;margin-top:-4px">Rigid and race-focused. Best for serious setups, overkill for most.</span>` +
-`<div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:2px;font-size:12px;color:rgba(255,255,255,0.4);">` +
-`For more info <a href="/seats/" target="_blank" style="color:#fea700;font-weight:700;text-decoration:none;">click here →</a></div>`;
   document.body.appendChild(seatBubble);
+  function renderSeatBubble() {
+
+if (_dimSpec === "kart") {
+    seatBubble.innerHTML =
+      `<span style="color:rgba(255,255,255,0.4);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700">Kart Seat</span><br>` +
+      `<span style="font-size:12px;color:rgba(255,255,255,0.75)">Available in Black, Beige, or White.</span><br>` +
+      `<span style="font-size:11px;color:rgba(255,255,255,0.35);display:block;margin-top:2px">White costs an additional ₹1,000, while Black and Beige cost an additional ₹2,000.</span>`;
+}
+
+else if (_dimSpec === "pit") {
+    seatBubble.innerHTML =
+      `<span style="color:rgba(255,255,255,0.4);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700">Office Chair Compatibility</span><br>` +
+      `<span style="font-size:12px;color:rgba(255,255,255,0.75)">Designed for standard office chairs.</span><br>` +
+      `<span style="font-size:11px;color:rgba(255,255,255,0.35);display:block;margin-top:2px">For a secure fit, the front two caster wheels should be within 500 mm of each other so they lock into place.</span>`;
+}
+
+  else {
+    seatBubble.innerHTML =
+      `<span style="color:rgba(255,255,255,0.4);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700">Seat Options</span><br>` +
+      `<span style="color:rgba(255,255,255,0.5)">Used Car Seat</span><span style="color:#fff;font-weight:600;margin-left:6px">From ₹2,000</span><br>` +
+      `<span style="font-size:11px;color:rgba(255,255,255,0.35);display:block;margin-bottom:4px;margin-top:-4px">Most comfortable and best value. Built for real driving, perfect for long sessions.</span>` +
+      `<span style="color:rgba(255,255,255,0.5)">Simulator Seat</span><span style="color:#fff;font-weight:600;margin-left:6px">₹6,500</span><br>` +
+      `<span style="font-size:11px;color:rgba(255,255,255,0.35);display:block;margin-bottom:4px;margin-top:-4px">Affordable and clean-looking. Easy fit, but less comfortable over time.</span>` +
+      `<span style="color:rgba(255,255,255,0.5)">Fiberglass Seat</span><span style="color:#fff;font-weight:600;margin-left:6px">From ₹16,500</span><br>` +
+      `<span style="font-size:11px;color:rgba(255,255,255,0.35);display:block;margin-bottom:6px;margin-top:-4px">Rigid and race-focused. Best for serious setups, overkill for most.</span>` +
+      `<div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:2px;font-size:12px;color:rgba(255,255,255,0.4);">For more info <a href="/seats/" target="_blank" style="color:#fea700;font-weight:700;text-decoration:none;">click here →</a></div>`;
+  }
+}
 
   const seatBtn = document.createElement('button');
   seatBtn.id = 'seatBtn';
   seatBtn.title = 'Seat options';
 seatBtn.innerHTML = `Seat`;
-'font-size:12px',
-'font-weight:700',
-'letter-spacing:1px',
-'text-transform:uppercase',
   seatBtn.style.cssText = [
     'position:fixed',
     'right:20px',
@@ -849,6 +1037,7 @@ seatBtn.innerHTML = `Seat`;
     const opening = seatBubble.style.display === 'none';
     if (opening) {
       closeDimBubble();           // close ruler if open
+      renderSeatBubble();
       seatBubble.style.display = '';
       seatBtn.classList.add('active');
     } else {
@@ -881,6 +1070,7 @@ seatBtn.innerHTML = `Seat`;
   window.switchSpec = function(spec, btn) {
     _origSwitchSpec(spec, btn);
     _dimSpec   = spec;
+    renderSeatBubble();
     _dimScreen = null;
     if (dimBubble.style.display !== 'none') renderDimBubble();
   };
